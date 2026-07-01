@@ -31,7 +31,7 @@
   .kpi .lbl{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
   .kpi .val{font-size:26px;font-weight:800;margin-top:6px;color:var(--green)}
   .kpi .val.orange{color:var(--orange-d)}
-  .kpi::after{content:'';position:absolute;right:-20px;top:-20px;width:70px;height:70px;border-radius:50%;background:rgba(240,122,31,.08)}
+  .kpi::after{display:none}
   .cols{grid-template-columns:1fr 1fr}
   @media(max-width:900px){.cols{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--ring);border-radius:18px;padding:22px}
@@ -167,14 +167,21 @@
 
     <div class="grid"><div class="card full">
       <h2>Faturamento × Investimento <span class="tag">diário</span></h2>
-      <div class="hint">Barras = faturamento · linha = investimento (Meta)</div>
+      <div class="hint">Barras = faturamento (eixo esq.) · linha = investimento Meta (eixo dir.)</div>
       <div class="chart-box"><canvas id="relChart"></canvas></div>
     </div></div>
 
     <div class="grid cols">
-      <div class="card"><h2>Funil (período)</h2><div class="hint">Do clique à venda</div><div class="funnel" id="rl-funnel"></div></div>
-      <div class="card"><h2>Google — investimento/dia</h2><div class="hint">Gasto diário no Search</div><div class="chart-box"><canvas id="relGChart"></canvas></div></div>
+      <div class="card"><h2>Funil Meta <span class="tag">período</span></h2><div class="hint">Do clique à venda</div><div class="funnel" id="rl-funnel"></div></div>
+      <div class="card"><h2>Google — por campanha <span class="tag">período</span></h2><div class="hint">Desempenho no Search</div>
+        <table><thead><tr><th>Campanha</th><th>Invest.</th><th>Conv.</th><th>CPA</th><th>CTR</th></tr></thead><tbody id="rl-gcamp"></tbody></table>
+      </div>
     </div>
+
+    <div class="grid"><div class="card full">
+      <h2>Google — investimento/dia</h2><div class="hint">Gasto diário no Search</div>
+      <div class="chart-box"><canvas id="relGChart"></canvas></div>
+    </div></div>
 
     <div class="grid"><div class="card full">
       <h2>Tabela diária — Meta</h2>
@@ -416,32 +423,44 @@ const RMES={'03':'Março','04':'Abril','05':'Maio','06':'Junho','07':'Julho','08
 const rsel=document.getElementById('rl-mes');
 rsel.innerHTML='<option value="all">Todo o período</option>'+Object.keys(RMES).map(m=>`<option value="${m}">${RMES[m]} / 2025</option>`).join('');
 let relC,relG;
+const tipMoney={callbacks:{label:c=>c.dataset.label+': '+BRL(c.parsed.y)}};
 function relatorio(){
   const m=rsel.value;
   const md=METAD.filter(r=>m==='all'||r[0].slice(3,5)===m);
-  const gd=GOOGD.filter(r=>m==='all'||r[0].slice(3,5)===m);
+  const gc=GOOGC.filter(r=>m==='all'||r[0].slice(3,5)===m);
   const S=md.reduce((a,r)=>{a.inv+=r[1];a.imp+=r[2];a.clk+=r[3];a.vis+=r[4];a.atc+=r[5];a.chk+=r[6];a.vd+=r[7];a.fat+=r[8];return a;},{inv:0,imp:0,clk:0,vis:0,atc:0,chk:0,vd:0,fat:0});
-  const gInv=gd.reduce((a,r)=>a+r[1],0);
-  const roas=S.inv?S.fat/S.inv:0, tk=S.vd?S.fat/S.vd:0;
+  const camp={}, gday={}; let gInv=0,gConv=0;
+  gc.forEach(r=>{const [d,c,inv,imp,clk,cv]=r; const a=camp[c]||(camp[c]=[0,0,0,0]); a[0]+=inv;a[1]+=imp;a[2]+=clk;a[3]+=cv; gInv+=inv;gConv+=cv; gday[d]=(gday[d]||0)+inv;});
+  const roas=S.inv?S.fat/S.inv:0, cpaM=S.vd?S.inv/S.vd:0;
   document.getElementById('rl-kpis').innerHTML=[
-    ['Investimento Meta',BRL(S.inv)],['Faturamento',BRL(S.fat)],['ROAS',roas.toFixed(2)+'x'],
-    ['Vendas',S.vd.toLocaleString('pt-BR')],['Ticket médio',BRL(tk)],['Invest. Google',BRL(gInv)]
+    ['Investimento total',BRL(S.inv+gInv)],['Faturamento',BRL(S.fat)],['ROAS (Meta)',roas.toFixed(2)+'x'],
+    ['Vendas (Meta)',S.vd.toLocaleString('pt-BR')],['Conversões (Google)',gConv.toLocaleString('pt-BR')],['CPA (Meta)',BRL(cpaM)]
   ].map(k=>`<div class="kpi"><div class="lbl">${k[0]}</div><div class="val">${k[1]}</div></div>`).join('');
-  // Faturamento x Investimento
+  // Faturamento (barras, eixo esq) x Investimento (linha na frente, eixo dir)
   const dC={labels:md.map(r=>r[0]),datasets:[
-    {type:'bar',label:'Faturamento',data:md.map(r=>r[8]),backgroundColor:'#1b5540',borderRadius:2},
-    {type:'line',label:'Investimento',data:md.map(r=>r[1]),borderColor:'#F07A1F',borderWidth:2,pointRadius:0,tension:.3}]};
-  const oC={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14}},y:{ticks:{callback:v=>'R$ '+(v/1000).toFixed(0)+'k'},grid:{color:'#eef2f0'}}}};
-  if(relC){relC.data=dC;relC.update();}else relC=new Chart(document.getElementById('relChart'),{data:dC,options:oC});
+    {type:'bar',label:'Faturamento',data:md.map(r=>r[8]),backgroundColor:'#1b5540',borderRadius:2,order:2,yAxisID:'y'},
+    {type:'line',label:'Investimento',data:md.map(r=>r[1]),borderColor:'#F07A1F',backgroundColor:'#F07A1F',borderWidth:2.5,pointRadius:0,tension:.3,order:0,yAxisID:'y1'}]};
+  const oC={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',labels:{boxWidth:12}},tooltip:tipMoney},
+    scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14}},
+      y:{position:'left',beginAtZero:true,ticks:{callback:v=>'R$ '+(v/1000).toLocaleString('pt-BR')+'k'},grid:{color:'#eef2f0'}},
+      y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{callback:v=>'R$ '+v.toLocaleString('pt-BR')}}}};
+  if(relC){relC.data=dC;relC.options=oC;relC.update();}else relC=new Chart(document.getElementById('relChart'),{data:dC,options:oC});
+  // Google por campanha
+  document.getElementById('rl-gcamp').innerHTML=Object.entries(camp).sort((a,b)=>b[1][0]-a[1][0]).map(([c,a])=>{
+    const cpa=a[3]?a[0]/a[3]:0, ctr=a[1]?a[2]/a[1]*100:0;
+    return `<tr><td class="name">${c}</td><td>${BRL(a[0])}</td><td>${a[3].toLocaleString('pt-BR')}</td><td>${BRL(cpa)}</td><td>${ctr.toFixed(1)}%</td></tr>`;
+  }).join('');
   // Google diario
-  const dG={labels:gd.map(r=>r[0]),datasets:[{label:'Google',data:gd.map(r=>r[1]),backgroundColor:'#F07A1F',borderRadius:2}]};
-  const oG={maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:10}},y:{ticks:{callback:v=>'R$ '+v},grid:{color:'#eef2f0'}}}};
-  if(relG){relG.data=dG;relG.update();}else relG=new Chart(document.getElementById('relGChart'),{type:'bar',data:dG,options:oG});
+  const gd=Object.entries(gday);
+  const dG={labels:gd.map(x=>x[0]),datasets:[{label:'Investimento Google',data:gd.map(x=>Math.round(x[1])),backgroundColor:'#F07A1F',borderRadius:2}]};
+  const oG={maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tipMoney},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:12}},y:{beginAtZero:true,ticks:{callback:v=>'R$ '+v.toLocaleString('pt-BR')},grid:{color:'#eef2f0'}}}};
+  if(relG){relG.data=dG;relG.options=oG;relG.update();}else relG=new Chart(document.getElementById('relGChart'),{type:'bar',data:dG,options:oG});
   // funil
   const st=[['Cliques',S.clk],['Visitas',S.vis],['Carrinho',S.atc],['Checkout',S.chk],['Vendas',S.vd]];
   const mxv=st[0][1]||1;
   document.getElementById('rl-funnel').innerHTML=st.map((s,i)=>{const w=Math.max(8,s[1]/mxv*100);const c=i>0&&st[i-1][1]?((s[1]/st[i-1][1])*100).toFixed(1)+'%':'—';return `<div class="fstep"><div class="fname">${s[0]}</div><div class="fbar" style="width:${w}%">${s[1].toLocaleString('pt-BR')}</div><div class="fmeta">${c}</div></div>`;}).join('');
-  // tabela
+  // tabela Meta
   document.getElementById('rl-tbody').innerHTML=md.map(r=>`<tr><td class="name">${r[0]}</td><td>${BRL(r[1])}</td><td>${r[3].toLocaleString('pt-BR')}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${BRL(r[8])}</td><td>${(r[1]?r[8]/r[1]:0).toFixed(2)}x</td></tr>`).join('');
 }
 rsel.onchange=relatorio; relatorio();
