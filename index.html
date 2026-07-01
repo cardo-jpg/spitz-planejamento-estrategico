@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spitz Pomer — Dashboard de Tráfego</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --green:#12402f; --green2:#1b5540; --orange:#F07A1F; --orange-d:#d9670f;
+    --cream:#FBF3D9; --ink:#0d2a20; --muted:#6f8379; --card:#ffffff; --ring:#e7ede9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--ink);padding:24px}
+  .wrap{max-width:1200px;margin:0 auto}
+  header{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:20px;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;box-shadow:0 10px 30px rgba(18,64,47,.25)}
+  header h1{font-size:26px;font-weight:800;letter-spacing:.3px}
+  header .brand{display:flex;align-items:center;gap:14px}
+  header .dot{width:44px;height:44px;border-radius:12px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff}
+  header .period{background:rgba(255,255,255,.12);padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600}
+  header .sub{font-size:12px;opacity:.75;font-weight:500;margin-top:2px}
+  .tabs{display:flex;gap:8px;margin-top:20px}
+  .tab{background:#fff;border:1px solid var(--ring);border-radius:12px 12px 0 0;padding:12px 22px;font-weight:700;color:var(--muted);cursor:pointer;font-size:14px}
+  .tab.active{color:var(--green);border-bottom:3px solid var(--orange);background:#fff}
+  .pane{display:none}
+  .pane.active{display:block}
+  .grid{display:grid;gap:16px;margin-top:16px}
+  .kpis{grid-template-columns:repeat(6,1fr)}
+  @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--card);border:1px solid var(--ring);border-radius:16px;padding:18px;position:relative;overflow:hidden}
+  .kpi .lbl{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .kpi .val{font-size:26px;font-weight:800;margin-top:6px;color:var(--green)}
+  .kpi .val.orange{color:var(--orange-d)}
+  .kpi::after{content:'';position:absolute;right:-20px;top:-20px;width:70px;height:70px;border-radius:50%;background:rgba(240,122,31,.08)}
+  .cols{grid-template-columns:1fr 1fr}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--ring);border-radius:18px;padding:22px}
+  .card h2{font-size:15px;font-weight:800;color:var(--green);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .card h2 .tag{background:var(--orange);color:#fff;font-size:10px;padding:3px 8px;border-radius:6px;font-weight:700}
+  .card .hint{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .chart-box{position:relative;height:280px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:right;padding:10px 8px;border-bottom:1px solid var(--ring)}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+  td.name{font-weight:700;color:var(--green)}
+  .badge{display:inline-block;padding:3px 8px;border-radius:6px;font-weight:700;font-size:12px}
+  .b-good{background:#e6f4ec;color:#1a7a4c}.b-mid{background:#fff3e0;color:#b45f0a}.b-bad{background:#fdecec;color:#c0392b}
+  .split{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .split .legend{flex:1;min-width:160px}
+  .lgrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--ring)}
+  .lgrow:last-child{border:none}
+  .lgrow .l{display:flex;align-items:center;gap:8px;font-weight:700}
+  .sw{width:12px;height:12px;border-radius:4px}
+  .funnel{display:flex;flex-direction:column;gap:8px}
+  .fstep{display:flex;align-items:center;gap:12px}
+  .fstep .fbar{height:34px;border-radius:8px;background:linear-gradient(90deg,var(--orange),var(--orange-d));display:flex;align-items:center;padding:0 12px;color:#fff;font-weight:700;font-size:13px;min-width:60px}
+  .fstep .fmeta{font-size:12px;color:var(--muted)}
+  .fstep .fname{width:120px;font-size:13px;font-weight:700;color:var(--green)}
+  footer{margin-top:22px;text-align:center;color:var(--muted);font-size:12px;padding:16px}
+  .note{background:#fff;border:1px dashed var(--ring);border-radius:12px;padding:12px 16px;font-size:12px;color:var(--muted);margin-top:16px}
+  .full{grid-column:1/-1}
+  /* plano */
+  .controls{display:flex;gap:16px;flex-wrap:wrap;align-items:end;margin-bottom:6px}
+  .ctl{display:flex;flex-direction:column;gap:4px}
+  .ctl label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .ctl input{width:120px;padding:9px 10px;border:1px solid var(--ring);border-radius:10px;font-size:14px;font-weight:700;color:var(--green)}
+  .btn{padding:9px 16px;border:none;border-radius:10px;background:var(--green);color:#fff;font-weight:700;cursor:pointer;font-size:13px}
+  .btn.ghost{background:#fff;border:1px solid var(--ring);color:var(--muted)}
+  .plan-table td .evinput{width:100px;padding:7px 8px;border:1px solid var(--orange);border-radius:8px;text-align:right;font-weight:700;color:var(--orange-d);background:#fff8f1}
+  .plan-table tr.cap td{color:var(--orange-d)}
+  .plan-table tfoot td{font-weight:800;color:var(--green);border-top:2px solid var(--green);font-size:14px}
+  .pill{font-size:11px;padding:2px 7px;border-radius:6px;background:#e6f4ec;color:#1a7a4c;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="dot">SP</div>
+      <div>
+        <h1>Spitz Pomer — Tráfego Pago</h1>
+        <div class="sub">Meta Ads + Google Ads · Performance & Planejamento</div>
+      </div>
+    </div>
+    <div class="period">📅 Histórico: 26/03–26/12/2025</div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-t="perf">📊 Performance</div>
+    <div class="tab" data-t="plan">💰 Plano de Verba</div>
+  </div>
+
+  <!-- ================= PERFORMANCE ================= -->
+  <div class="pane active" id="perf">
+    <div class="grid kpis">
+      <div class="kpi"><div class="lbl">Investimento total</div><div class="val">R$ 366,6 mil</div></div>
+      <div class="kpi"><div class="lbl">Faturamento</div><div class="val orange">R$ 1,51 mi</div></div>
+      <div class="kpi"><div class="lbl">ROAS (Meta)</div><div class="val">6,08x</div></div>
+      <div class="kpi"><div class="lbl">Vendas</div><div class="val">8.482</div></div>
+      <div class="kpi"><div class="lbl">Ticket médio</div><div class="val">R$ 178</div></div>
+      <div class="kpi"><div class="lbl">CPA (Meta)</div><div class="val">R$ 29</div></div>
+    </div>
+
+    <div class="grid cols">
+      <div class="card">
+        <h2>Meta × Google <span class="tag">verba</span></h2>
+        <div class="hint">Distribuição do investimento entre plataformas</div>
+        <div class="split">
+          <div class="chart-box" style="height:200px;width:200px;flex:0 0 200px"><canvas id="splitChart"></canvas></div>
+          <div class="legend">
+            <div class="lgrow"><div class="l"><span class="sw" style="background:#1b5540"></span>Meta Ads</div><div><b>R$ 247,8k</b> · 68%</div></div>
+            <div class="lgrow"><div class="l"><span class="sw" style="background:#F07A1F"></span>Google Ads</div><div><b>R$ 118,8k</b> · 32%</div></div>
+            <div class="lgrow"><div class="l">Faturamento (Meta)</div><div><b>R$ 1,51 mi</b></div></div>
+            <div class="lgrow"><div class="l">ROAS Meta</div><div><span class="badge b-good">6,08x</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Google Search — por campanha <span class="tag">CPA</span></h2>
+        <div class="hint">Termos da Marca é o motor: CPA baixo e alto volume</div>
+        <table><thead><tr><th>Campanha</th><th>Invest.</th><th>Vendas</th><th>CPA</th><th>CTR</th></tr></thead>
+        <tbody id="gtable"></tbody></table>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card full">
+        <h2>Evolução mensal <span class="tag">sazonalidade</span></h2>
+        <div class="hint">Faturamento (barras) e ROAS (linha). Pico em julho (férias) · vales em mai/jun e dez.</div>
+        <div class="chart-box"><canvas id="monthChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid cols">
+      <div class="card">
+        <h2>Funil Meta <span class="tag">jornada</span></h2>
+        <div class="hint">Do clique à venda (impressões: 23,7 mi)</div>
+        <div class="funnel" id="funnel"></div>
+      </div>
+      <div class="card">
+        <h2>Google — investimento por campanha</h2>
+        <div class="hint">Concentração em Marca + Nicho</div>
+        <div class="chart-box"><canvas id="gbarChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="note">⚠️ <b>Notas:</b> ROAS/Faturamento referem-se ao e-commerce rastreado (Meta). O Google não registrava "valor de conversão" no período → mostramos CPA/conversões. Vendas Meta e Google se sobrepõem em atribuição (não somar). Dados: 26/03–26/12/2025.</div>
+  </div>
+
+  <!-- ================= PLANO DE VERBA ================= -->
+  <div class="pane" id="plan">
+    <div class="grid kpis" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi"><div class="lbl">Verba total / ano</div><div class="val" id="k-ano">—</div></div>
+      <div class="kpi"><div class="lbl">Meta / ano</div><div class="val">R$ <span id="k-meta">—</span></div></div>
+      <div class="kpi"><div class="lbl">Google / ano</div><div class="val orange">R$ <span id="k-goog">—</span></div></div>
+    </div>
+
+    <div class="grid">
+      <div class="card full">
+        <h2>Planejamento de verba mensal <span class="tag">editável</span></h2>
+        <div class="hint">
+          Regra: <b>Total = Base + Evento do mês + Antecipação (30% do evento do mês seguinte)</b>, teto R$ 60k.
+          Comece na Base (R$ 20k) e digite o <b style="color:var(--orange-d)">Adicional de evento</b> de cada mês — o resto calcula sozinho. As edições ficam salvas neste navegador.
+        </div>
+        <div class="controls">
+          <div class="ctl"><label>Base (R$)</label><input id="c-base" type="number" value="20000" step="1000"></div>
+          <div class="ctl"><label>Teto (R$)</label><input id="c-teto" type="number" value="60000" step="1000"></div>
+          <div class="ctl"><label>Antecipação (%)</label><input id="c-ant" type="number" value="30" step="5"></div>
+          <div class="ctl"><label>Split Meta (%)</label><input id="c-split" type="number" value="67" step="1"></div>
+          <button class="btn ghost" id="c-reset">↺ Zerar eventos</button>
+        </div>
+        <table class="plan-table" style="margin-top:14px">
+          <thead><tr>
+            <th>Mês</th><th>Base</th><th>+ Evento</th><th>+ Antecip.</th><th>= Total</th><th>Meta</th><th>Google</th>
+          </tr></thead>
+          <tbody id="planbody"></tbody>
+          <tfoot><tr>
+            <td>TOTAL ANO</td><td id="f-base"></td><td id="f-ev"></td><td id="f-ant"></td>
+            <td id="f-tot"></td><td id="f-meta"></td><td id="f-goog"></td>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid cols">
+      <div class="card full"><h2>Verba por mês</h2><div class="hint">Total mensal (barras) e split Meta/Google</div>
+        <div class="chart-box"><canvas id="planChart"></canvas></div></div>
+    </div>
+
+    <div class="note">
+      💡 <b>Guia de eventos (regra do cliente):</b> Feriado prolongado solto → +R$5k a 10k · Férias parciais / Eventos Locais (Dez, Jan, Páscoa) → +R$20k a 30k · Pico Absoluto (Julho) → +R$40k (bate no teto). Abril (Osterfest/Páscoa): lance só a parte proporcional aos dias do evento.
+    </div>
+  </div>
+
+  <footer>Cardô Marketing · Dashboard Spitz Pomer · Performance (histórico 2025) + Plano de Verba editável</footer>
+</div>
+
+<script>
+const BRL = n => 'R$ '+Math.round(n).toLocaleString('pt-BR');
+const kBRL = n => 'R$ '+(n/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+'k';
+
+// ---- Tabs ----
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active'); document.getElementById(t.dataset.t).classList.add('active');
+});
+
+/* ============ PERFORMANCE ============ */
+const g = [
+  {n:'Termos da Marca',inv:75675,v:5761,cpa:13.14,ctr:31.6,cls:'b-good'},
+  {n:'Termos do Nicho',inv:31184,v:1388,cpa:22.47,ctr:12.9,cls:'b-good'},
+  {n:'Termos Concorrentes',inv:7248,v:237,cpa:30.58,ctr:10.2,cls:'b-mid'},
+  {n:'Blog Pomerode',inv:2821,v:177,cpa:15.94,ctr:13.4,cls:'b-good'},
+  {n:'Blog',inv:1597,v:31,cpa:51.52,ctr:13.1,cls:'b-bad'},
+  {n:'Blog_V',inv:288,v:4,cpa:72.00,ctr:9.8,cls:'b-bad'},
+];
+document.getElementById('gtable').innerHTML=g.map(r=>`<tr><td class="name">${r.n}</td><td>${BRL(r.inv)}</td><td>${r.v.toLocaleString('pt-BR')}</td><td><span class="badge ${r.cls}">R$ ${r.cpa.toFixed(2)}</span></td><td>${r.ctr}%</td></tr>`).join('');
+new Chart(document.getElementById('splitChart'),{type:'doughnut',data:{labels:['Meta','Google'],datasets:[{data:[247779,118813],backgroundColor:['#1b5540','#F07A1F'],borderWidth:0}]},options:{cutout:'68%',plugins:{legend:{display:false}}}});
+const meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const hMes=['Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+new Chart(document.getElementById('monthChart'),{data:{labels:hMes,datasets:[
+  {type:'bar',label:'Faturamento',data:[36881,214581,107201,88838,390246,109693,96953,228247,199667,34631],backgroundColor:'#1b5540',borderRadius:6,yAxisID:'y'},
+  {type:'line',label:'ROAS',data:[6.06,7.20,3.45,3.68,9.53,5.71,4.41,7.14,7.78,2.04],borderColor:'#F07A1F',backgroundColor:'#F07A1F',borderWidth:3,tension:.35,pointRadius:4,yAxisID:'y1'}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12}}},scales:{y:{position:'left',ticks:{callback:v=>'R$ '+(v/1000)+'k'},grid:{color:'#eef2f0'}},y1:{position:'right',grid:{display:false},ticks:{callback:v=>v+'x'}}}}});
+new Chart(document.getElementById('gbarChart'),{type:'bar',data:{labels:g.map(x=>x.n),datasets:[{data:g.map(x=>x.inv),backgroundColor:'#F07A1F',borderRadius:6}]},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>'R$ '+(v/1000)+'k'},grid:{color:'#eef2f0'}},y:{grid:{display:false}}}}});
+const steps=[{n:'Cliques',v:241358},{n:'Visitas site',v:98574},{n:'Add carrinho',v:47150},{n:'Checkout',v:4031},{n:'Vendas',v:8482}];
+const mx=steps[0].v;
+document.getElementById('funnel').innerHTML=steps.map((s,i)=>{const w=Math.max(8,(s.v/mx)*100);const c=i>0?((s.v/steps[i-1].v)*100).toFixed(1)+'%':'—';return `<div class="fstep"><div class="fname">${s.n}</div><div class="fbar" style="width:${w}%">${s.v.toLocaleString('pt-BR')}</div><div class="fmeta">${c}</div></div>`;}).join('');
+
+/* ============ PLANO DE VERBA (editável) ============ */
+const LS='spitz_plano_v1';
+let eventos = JSON.parse(localStorage.getItem(LS) || 'null') || Array(12).fill(0);
+let planChart;
+
+function calc(){
+  const base=+document.getElementById('c-base').value||0;
+  const teto=+document.getElementById('c-teto').value||999999;
+  const ant=(+document.getElementById('c-ant').value||0)/100;
+  const split=(+document.getElementById('c-split').value||0)/100;
+  const rows=[]; let T={base:0,ev:0,ant:0,tot:0,meta:0,goog:0};
+  for(let i=0;i<12;i++){
+    const ev=+eventos[i]||0;
+    const antec=ant*(+eventos[(i+1)%12]||0);
+    const tot=Math.min(teto, base+ev+antec);
+    const meta=tot*split, goog=tot*(1-split);
+    rows.push({m:meses[i],base,ev,antec,tot,meta,goog,capped:base+ev+antec>teto});
+    T.base+=base;T.ev+=ev;T.ant+=antec;T.tot+=tot;T.meta+=meta;T.goog+=goog;
+  }
+  return {rows,T};
+}
+// Monta as linhas UMA vez (com os inputs); os inputs nao sao recriados depois
+function buildRows(){
+  document.getElementById('planbody').innerHTML=meses.map((m,i)=>`
+    <tr data-row="${i}">
+      <td class="name">${m}</td>
+      <td class="c-base"></td>
+      <td><input class="evinput" type="number" step="1000" data-i="${i}" value="${eventos[i]||0}"></td>
+      <td class="c-antec"></td>
+      <td class="c-tot"></td>
+      <td class="c-meta"></td>
+      <td class="c-goog"></td>
+    </tr>`).join('');
+  document.querySelectorAll('.evinput').forEach(inp=>inp.oninput=e=>{
+    eventos[+e.target.dataset.i]=+e.target.value||0;
+    localStorage.setItem(LS,JSON.stringify(eventos)); update();
+  });
+}
+// Atualiza SO os valores calculados (nao toca nos inputs -> mantem o foco)
+function update(){
+  const {rows,T}=calc();
+  document.querySelectorAll('#planbody tr').forEach(tr=>{
+    const r=rows[+tr.dataset.row];
+    tr.classList.toggle('cap',r.capped);
+    tr.querySelector('.c-base').textContent=BRL(r.base);
+    tr.querySelector('.c-antec').textContent=BRL(r.antec);
+    tr.querySelector('.c-tot').innerHTML=`<b>${BRL(r.tot)}</b>${r.capped?' <span class="pill">teto</span>':''}`;
+    tr.querySelector('.c-meta').textContent=BRL(r.meta);
+    tr.querySelector('.c-goog').textContent=BRL(r.goog);
+  });
+  f_base.textContent=BRL(T.base); f_ev.textContent=BRL(T.ev); f_ant.textContent=BRL(T.ant);
+  f_tot.textContent=BRL(T.tot); f_meta.textContent=BRL(T.meta); f_goog.textContent=BRL(T.goog);
+  document.getElementById('k-ano').textContent=kBRL(T.tot);
+  document.getElementById('k-meta').textContent=kBRL(T.meta).replace('R$ ','');
+  document.getElementById('k-goog').textContent=kBRL(T.goog).replace('R$ ','');
+  const data={labels:meses,datasets:[
+    {label:'Meta',data:rows.map(r=>r.meta),backgroundColor:'#1b5540',stack:'s',borderRadius:4},
+    {label:'Google',data:rows.map(r=>r.goog),backgroundColor:'#F07A1F',stack:'s',borderRadius:4}]};
+  if(planChart){planChart.data=data;planChart.update();}
+  else planChart=new Chart(document.getElementById('planChart'),{type:'bar',data,options:{maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>'R$ '+(v/1000)+'k'},grid:{color:'#eef2f0'}}}}});
+}
+const f_base=document.getElementById('f-base'),f_ev=document.getElementById('f-ev'),f_ant=document.getElementById('f-ant'),f_tot=document.getElementById('f-tot'),f_meta=document.getElementById('f-meta'),f_goog=document.getElementById('f-goog');
+['c-base','c-teto','c-ant','c-split'].forEach(id=>document.getElementById(id).oninput=update);
+document.getElementById('c-reset').onclick=()=>{eventos=Array(12).fill(0);localStorage.setItem(LS,JSON.stringify(eventos));buildRows();update();};
+buildRows(); update();
+</script>
+</body>
+</html>
