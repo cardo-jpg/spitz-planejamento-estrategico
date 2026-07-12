@@ -109,6 +109,7 @@
   <div class="tabs">
     <div class="tab" data-t="perf">📊 Análise</div>
     <div class="tab active" data-t="rel">📈 Dashboard</div>
+    <div class="tab" data-t="marca">📣 Reconhecimento</div>
     <div class="tab" data-t="plano">🚀 Planejamento</div>
     <div class="tab" data-t="plan">💰 Plano de Verba</div>
   </div>
@@ -205,9 +206,44 @@
     </div></div>
 
     <div class="grid"><div class="card full">
-      <h2>Campanhas · Públicos · Criativos <span class="tag">em breve</span></h2>
-      <div class="note" style="margin:0">📥 Estas tabelas (por <b>campanha</b>, <b>público</b> e <b>criativo</b>, com heatmap de ROAS igual ao Looker) precisam do <b>export granular do Meta</b> — a fonte atual só tem o somatório diário. Me manda a planilha com esses recortes que eu ligo aqui.</div>
+      <h2>Campanhas <span class="tag">snapshot jul 1–12</span></h2>
+      <div class="hint">Clique no cabeçalho para ordenar. Heatmap em Custo/venda e ROAS.</div>
+      <div style="overflow-x:auto"><table><thead id="th-camp"></thead><tbody id="tb-camp"></tbody></table></div>
     </div></div>
+
+    <div class="grid"><div class="card full">
+      <h2>Públicos <span class="tag">snapshot jul 1–12</span></h2>
+      <div class="hint">Clique no cabeçalho para ordenar.</div>
+      <div style="overflow-x:auto"><table><thead id="th-pub"></thead><tbody id="tb-pub"></tbody></table></div>
+    </div></div>
+
+    <div class="grid"><div class="card full">
+      <h2>Criativos <span class="tag">snapshot jul 1–12</span></h2>
+      <div class="hint">Clique no cabeçalho para ordenar.</div>
+      <div style="overflow-x:auto"><table><thead id="th-cria"></thead><tbody id="tb-cria"></tbody></table></div>
+    </div></div>
+
+    <div class="note">📸 As três tabelas acima são o <b>recorte do período (jul 1–12)</b> transcrito do Looker — por isso ainda <b>não respondem ao filtro de data</b>. Quando você me passar o export diário granular, elas passam a filtrar por dia igual ao topo.</div>
+  </div>
+
+  <!-- ================= RECONHECIMENTO / MARCA ================= -->
+  <div class="pane" id="marca">
+    <div class="grid"><div class="card full">
+      <h2>Campanhas de Marca <span class="tag">reconhecimento · alcance · seguidores</span></h2>
+      <div class="hint">Estas campanhas são de <b>marca</b> — avaliadas por <b>alcance, CPM e crescimento</b>, não por ROAS. Verba institucional, separada da performance de venda.</div>
+    </div></div>
+    <div class="grid kpis kpis7" id="mk-kpis"></div>
+    <div class="grid cols">
+      <div class="card"><h2>Reconhecimento / Alcance <span class="tag">Aberto 200km</span></h2>
+        <div class="hint">Público frio amplo, otimizado para alcance</div>
+        <table><tbody id="mk-recon"></tbody></table>
+      </div>
+      <div class="card"><h2>Seguidores <span class="tag">crescimento de perfil</span></h2>
+        <div class="hint">Campanha de crescimento no Instagram</div>
+        <table><tbody id="mk-seg"></tbody></table>
+      </div>
+    </div>
+    <div class="note">📥 Faltam os dados diários de <b>impressões, engajamento e seguidores/dia</b> (e a campanha de Engajamento) para completar esta aba com gráficos. Me manda o export dessas campanhas de marca que eu ligo aqui.</div>
   </div>
 
   <!-- ================= PLANO DE VERBA ================= -->
@@ -309,7 +345,7 @@
   <footer>Cardô Marketing · Dashboard Spitz Pomer · Performance · Planejamento · Plano de Verba</footer>
 </div>
 
-<script src="data.js?v=3"></script>
+<script src="data.js?v=4"></script>
 <script>
 const BRL = n => 'R$ '+Math.round(n).toLocaleString('pt-BR');
 const kBRL = n => 'R$ '+(n/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+'k';
@@ -498,6 +534,77 @@ function relatorio(){
 rDe.onchange=relatorio; rAte.onchange=relatorio;
 document.getElementById('rl-tudo').onclick=()=>{rDe.value=minISO;rAte.value=maxISO;relatorio();};
 relatorio();
+
+/* ============ TABELAS GRANULARES (snapshot) + ABA MARCA ============ */
+const fmtN=n=>n.toLocaleString('pt-BR');
+const pctBR=n=>n.toFixed(2).replace('.',',')+'%';
+const heatRoas=v=>{const c=v>=8?'#bfe6cd':v>=5?'#dcf0e4':v>=3?'#fdeecb':'#f8d7d7';return `style="background:${c};font-weight:800;color:var(--green)"`;};
+const heatCpv=v=>{const c=v<=25?'#dcf0e4':v<=45?'#fdeecb':'#f8d7d7';return `style="background:${c};font-weight:700"`;};
+function tabela(thId,tbId,rows,cols,st){
+  const th=document.getElementById(thId), tb=document.getElementById(tbId);
+  th.innerHTML='<tr>'+cols.map((c,i)=>`<th data-i="${i}" style="cursor:pointer;white-space:nowrap">${c[0]}${st.i===i?(st.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
+  const rr=[...rows].sort((a,b)=>{const va=cols[st.i][2](a),vb=cols[st.i][2](b);return(va>vb?1:va<vb?-1:0)*st.dir;});
+  tb.innerHTML=rr.map(r=>'<tr>'+cols.map(c=>c[1](r)).join('')+'</tr>').join('');
+  th.querySelectorAll('th').forEach(h=>h.onclick=()=>{const i=+h.dataset.i;st.dir=(st.i===i?-st.dir:-1);st.i=i;tabela(thId,tbId,rows,cols,st);});
+}
+const colsCamp=[
+ ['Campanha',r=>`<td class="name">${r[0]}</td>`,r=>r[0]],
+ ['Investido',r=>`<td>${BRL(r[1])}</td>`,r=>r[1]],
+ ['Cliques',r=>`<td>${fmtN(r[2])}</td>`,r=>r[2]],
+ ['CPC',r=>`<td>${BRL(r[3])}</td>`,r=>r[3]],
+ ['CTR',r=>`<td>${pctBR(r[4])}</td>`,r=>r[4]],
+ ['Carrinho',r=>`<td>${r[5]}</td>`,r=>r[5]],
+ ['Checkout',r=>`<td>${r[6]}</td>`,r=>r[6]],
+ ['Vendas',r=>`<td>${r[7]}</td>`,r=>r[7]],
+ ['Custo/venda',r=>`<td ${heatCpv(r[8])}>${BRL(r[8])}</td>`,r=>r[8]],
+ ['ROAS',r=>`<td ${heatRoas(r[9])}>${r[9]}x</td>`,r=>r[9]]
+];
+const colsPub=[
+ ['Público',r=>`<td class="name">${r[0]}</td>`,r=>r[0]],
+ ['Investido',r=>`<td>${BRL(r[1])}</td>`,r=>r[1]],
+ ['Cliques',r=>`<td>${fmtN(r[2])}</td>`,r=>r[2]],
+ ['CPC',r=>`<td>${BRL(r[3])}</td>`,r=>r[3]],
+ ['CTR',r=>`<td>${pctBR(r[4])}</td>`,r=>r[4]],
+ ['Carrinho',r=>`<td>${r[5]}</td>`,r=>r[5]],
+ ['Checkout',r=>`<td>${r[6]}</td>`,r=>r[6]],
+ ['Vendas',r=>`<td>${r[7]}</td>`,r=>r[7]],
+ ['Custo/venda',r=>`<td ${heatCpv(r[8])}>${BRL(r[8])}</td>`,r=>r[8]],
+ ['Faturamento',r=>`<td style="color:var(--green);font-weight:700">${BRL(r[9])}</td>`,r=>r[9]],
+ ['ROAS',r=>`<td ${heatRoas(r[10])}>${r[10]}x</td>`,r=>r[10]]
+];
+const colsCria=[
+ ['Criativo',r=>`<td class="name">${r[0]}</td>`,r=>r[0]],
+ ['Investido',r=>`<td>${BRL(r[1])}</td>`,r=>r[1]],
+ ['Cliques',r=>`<td>${fmtN(r[2])}</td>`,r=>r[2]],
+ ['CPC',r=>`<td>${BRL(r[3])}</td>`,r=>r[3]],
+ ['CTR',r=>`<td>${pctBR(r[4])}</td>`,r=>r[4]],
+ ['Carrinho',r=>`<td>${r[5]}</td>`,r=>r[5]],
+ ['Checkout',r=>`<td>${r[6]}</td>`,r=>r[6]],
+ ['Vendas',r=>`<td>${r[7]}</td>`,r=>r[7]],
+ ['Ticket',r=>`<td>${BRL(r[8])}</td>`,r=>r[8]],
+ ['Custo/venda',r=>`<td ${heatCpv(r[9])}>${BRL(r[9])}</td>`,r=>r[9]],
+ ['Faturamento',r=>`<td style="color:var(--green);font-weight:700">${BRL(r[10])}</td>`,r=>r[10]],
+ ['ROAS',r=>`<td ${heatRoas(r[11])}>${r[11]}x</td>`,r=>r[11]]
+];
+tabela('th-camp','tb-camp',CAMP,colsCamp,{i:9,dir:-1});
+tabela('th-pub','tb-pub',PUB,colsPub,{i:10,dir:-1});
+tabela('th-cria','tb-cria',CRIA,colsCria,{i:11,dir:-1});
+
+// Aba Marca
+(function(){
+  const R=BRAND.recon, G=BRAND.seg;
+  const invTot=R.inv+G.inv, custoSeg=G.seguidores?G.inv/G.seguidores:0;
+  document.getElementById('mk-kpis').innerHTML=[
+    ['Investimento marca',BRL(invTot)],['Alcance',(R.alcance/1e6).toFixed(2).replace('.',',')+' mi'],
+    ['Custo/mil alcance',BRL(R.cpmAlc)],['Frequência',R.freq.toFixed(2).replace('.',',')],
+    ['Seguidores',fmtN(G.seguidores)],['Custo/seguidor',BRL(custoSeg)],['Cliques (seg.)',fmtN(G.cliques)]
+  ].map(k=>`<div class="kpi"><div class="lbl">${k[0]}</div><div class="val">${k[1]}</div></div>`).join('');
+  const linha=(a,b)=>`<tr><td class="name">${a}</td><td style="text-align:right">${b}</td></tr>`;
+  document.getElementById('mk-recon').innerHTML=
+    linha('Investimento',BRL(R.inv))+linha('Alcance',fmtN(R.alcance))+linha('Custo por mil alcançados',BRL(R.cpmAlc))+linha('Frequência',R.freq.toFixed(2).replace('.',','));
+  document.getElementById('mk-seg').innerHTML=
+    linha('Investimento',BRL(G.inv))+linha('Seguidores ganhos',fmtN(G.seguidores))+linha('Custo por seguidor',BRL(custoSeg))+linha('Cliques',fmtN(G.cliques))+linha('CTR',pctBR(G.ctr));
+})();
 </script>
 </body>
 </html>
