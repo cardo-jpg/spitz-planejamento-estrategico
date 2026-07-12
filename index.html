@@ -26,7 +26,10 @@
   .pane.active{display:block}
   .grid{display:grid;gap:16px;margin-top:16px}
   .kpis{grid-template-columns:repeat(6,1fr)}
+  .grid.kpis7{grid-template-columns:repeat(7,1fr)}
+  @media(max-width:1000px){.grid.kpis7{grid-template-columns:repeat(4,1fr)}}
   @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:640px){.grid.kpis7{grid-template-columns:repeat(2,1fr)}}
   .kpi{background:var(--card);border:1px solid var(--ring);border-top:3px solid var(--orange);border-radius:16px;padding:18px;position:relative;overflow:hidden}
   .grid.kpis .kpi:nth-child(3n+1){border-top-color:var(--green2)}
   .grid.kpis .kpi:nth-child(3n+2){border-top-color:var(--orange)}
@@ -61,6 +64,18 @@
   .fstep .fbar{height:34px;border-radius:8px;display:flex;align-items:center;padding:0 12px;color:#fff;font-weight:700;font-size:13px;min-width:50px;box-shadow:0 2px 6px rgba(0,0,0,.10)}
   .fstep .fmeta{font-size:12px;color:var(--muted);font-weight:700;text-align:left}
   .fstep .fname{font-size:13px;font-weight:700;color:var(--green)}
+  /* funil estilizado (e-commerce) */
+  .efunnel{display:flex;flex-direction:column;gap:9px;padding:6px 0}
+  .efstep{display:grid;grid-template-columns:110px 1fr 210px;align-items:center;gap:16px}
+  @media(max-width:760px){.efstep{grid-template-columns:70px 1fr;gap:8px}.efstep .efcost{grid-column:2}}
+  .efstep .efconv{text-align:right;font-size:13px;color:var(--green2);font-weight:800}
+  .efstep .efconv small{display:block;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .efstep .efbar{margin:0 auto;color:#fff;border-radius:10px;padding:11px 10px;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.12);min-width:110px;max-width:100%}
+  .efstep .efbar b{display:block;font-size:19px;font-weight:800;line-height:1.15}
+  .efstep .efbar span{font-size:10px;opacity:.9;text-transform:uppercase;letter-spacing:.5px}
+  .efstep .efcost{display:flex;gap:7px;flex-wrap:wrap}
+  .efstep .efcost .pill2{background:#f4f7f5;border:1px solid var(--ring);border-radius:8px;padding:5px 9px;font-size:12px;color:var(--green);font-weight:800;white-space:nowrap}
+  .efstep .efcost .pill2 small{display:block;font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
   footer{margin-top:22px;text-align:center;color:var(--muted);font-size:12px;padding:16px}
   .note{background:#fff;border:1px dashed var(--ring);border-radius:12px;padding:12px 16px;font-size:12px;color:var(--muted);margin-top:16px}
   .full{grid-column:1/-1}
@@ -153,36 +168,30 @@
     <div class="note">⚠️ <b>Notas:</b> ROAS/Faturamento referem-se ao e-commerce rastreado (Meta). O Google não registrava "valor de conversão" no período → mostramos CPA/conversões. Vendas Meta e Google se sobrepõem em atribuição (não somar). Dados: 26/03–26/12/2025.</div>
   </div>
 
-  <!-- ================= RELATÓRIO (dados diários) ================= -->
+  <!-- ================= DASHBOARD META (ao vivo) ================= -->
   <div class="pane active" id="rel">
     <div class="grid"><div class="card full">
-      <h2>Relatório de campanhas <span class="tag">dados diários</span></h2>
-      <div class="hint">Números reais das campanhas, dia a dia. Selecione o período.</div>
+      <h2>Centro de Inteligência — Meta Ads <span class="tag">ao vivo</span></h2>
+      <div class="hint">Selecione o intervalo de datas — todos os indicadores abaixo recalculam.</div>
       <div class="controls">
-        <div class="ctl"><label>Período</label>
-          <select id="rl-mes" style="width:180px;padding:9px 10px;border:1px solid var(--ring);border-radius:10px;font-size:14px;font-weight:700;color:var(--green)"></select>
-        </div>
+        <div class="ctl"><label>De</label><input type="date" id="rl-de"></div>
+        <div class="ctl"><label>Até</label><input type="date" id="rl-ate"></div>
+        <button class="btn ghost" id="rl-tudo">↺ Período todo</button>
       </div>
     </div></div>
 
-    <div class="grid kpis" id="rl-kpis"></div>
+    <div class="grid kpis kpis7" id="rl-kpis"></div>
 
     <div class="grid"><div class="card full">
-      <h2>Faturamento × Investimento <span class="tag">diário</span></h2>
-      <div class="hint">Barras = faturamento (eixo esq.) · linha = investimento Meta (eixo dir.)</div>
-      <div class="chart-box"><canvas id="relChart"></canvas></div>
+      <h2>Funil do e-commerce <span class="tag">Meta</span></h2>
+      <div class="hint">Da impressão à venda — taxa de conversão entre etapas e custo por etapa.</div>
+      <div class="efunnel" id="rl-funnel"></div>
     </div></div>
 
-    <div class="grid cols">
-      <div class="card"><h2>Funil Meta <span class="tag">período</span></h2><div class="hint">Do clique à venda</div><div class="funnel" id="rl-funnel"></div></div>
-      <div class="card"><h2>Google — por campanha <span class="tag">período</span></h2><div class="hint">Desempenho no Search</div>
-        <table><thead><tr><th>Campanha</th><th>Invest.</th><th>Conv.</th><th>CPA</th><th>CTR</th></tr></thead><tbody id="rl-gcamp"></tbody></table>
-      </div>
-    </div>
-
-    <div class="grid" id="card-gday"><div class="card full">
-      <h2>Google — investimento/dia</h2><div class="hint">Gasto diário no Search</div>
-      <div class="chart-box"><canvas id="relGChart"></canvas></div>
+    <div class="grid"><div class="card full">
+      <h2>Acompanhamento diário do ROAS <span class="tag">geral</span></h2>
+      <div class="hint">Barras: Investimento + Faturamento · linha: ROAS · referências ROAS ideal (5,0x) e mínimo (3,0x).</div>
+      <div class="chart-box" style="height:320px"><canvas id="relChart"></canvas></div>
     </div></div>
 
     <div class="grid"><div class="card full">
@@ -193,6 +202,11 @@
           <th>Data</th><th>Invest.</th><th>Cliques</th><th>Carrinho</th><th>Checkout</th><th>Vendas</th><th>Faturamento</th><th>ROAS</th>
         </tr></thead><tbody id="rl-tbody"></tbody></table>
       </div>
+    </div></div>
+
+    <div class="grid"><div class="card full">
+      <h2>Campanhas · Públicos · Criativos <span class="tag">em breve</span></h2>
+      <div class="note" style="margin:0">📥 Estas tabelas (por <b>campanha</b>, <b>público</b> e <b>criativo</b>, com heatmap de ROAS igual ao Looker) precisam do <b>export granular do Meta</b> — a fonte atual só tem o somatório diário. Me manda a planilha com esses recortes que eu ligo aqui.</div>
     </div></div>
   </div>
 
@@ -427,63 +441,63 @@ document.getElementById('pl-verba').oninput=planejar;
 document.getElementById('pl-split').oninput=planejar;
 planejar();
 
-/* ============ RELATÓRIO (dados diários) ============ */
-const RMES={'01':'Janeiro','02':'Fevereiro','03':'Março','04':'Abril','05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'};
-const rsel=document.getElementById('rl-mes');
-// Constroi o seletor a partir dos meses que existem no METAD (cresce sozinho quando adicionar mais meses)
-const mesesSP=[...new Set(METAD.map(r=>r[0].slice(3,5)))].sort();
-rsel.innerHTML=(mesesSP.length>1?'<option value="all">Todo o período</option>':'')+mesesSP.map(m=>`<option value="${m}">${RMES[m]} / ${DASH_ANO}</option>`).join('');
-if(mesesSP.length) rsel.value=mesesSP[mesesSP.length-1];
-let relC,relG;
-const tipMoney={callbacks:{label:c=>c.dataset.label+': '+BRL(c.parsed.y)}};
+/* ============ DASHBOARD META (ao vivo · filtro por data) ============ */
+let relC;
+const rDe=document.getElementById('rl-de'), rAte=document.getElementById('rl-ate');
+const toISO=dm=>{const[d,m]=dm.split('/');return `${DASH_ANO}-${m}-${d}`;};
+const isoList=METAD.map(r=>toISO(r[0])).sort();
+const minISO=isoList[0], maxISO=isoList[isoList.length-1];
+[rDe,rAte].forEach(inp=>{inp.min=minISO;inp.max=maxISO;});
+rDe.value=minISO; rAte.value=maxISO;
+const FC2=['#12402f','#1b5540','#2e7d5b','#e08a2a','#d9670f','#b45f0a'];
+const pct=n=>n.toFixed(2).replace('.',',')+'%';
 function relatorio(){
-  const m=rsel.value;
-  const md=METAD.filter(r=>m==='all'||r[0].slice(3,5)===m);
-  const gc=GOOGC.filter(r=>m==='all'||r[0].slice(3,5)===m);
+  const de=rDe.value||minISO, ate=rAte.value||maxISO;
+  const md=METAD.filter(r=>{const i=toISO(r[0]);return i>=de&&i<=ate;});
   const S=md.reduce((a,r)=>{a.inv+=r[1];a.imp+=r[2];a.clk+=r[3];a.vis+=r[4];a.atc+=r[5];a.chk+=r[6];a.vd+=r[7];a.fat+=r[8];return a;},{inv:0,imp:0,clk:0,vis:0,atc:0,chk:0,vd:0,fat:0});
-  const camp={}, gday={}; let gInv=0,gConv=0;
-  gc.forEach(r=>{const [d,c,inv,imp,clk,cv]=r; const a=camp[c]||(camp[c]=[0,0,0,0]); a[0]+=inv;a[1]+=imp;a[2]+=clk;a[3]+=cv; gInv+=inv;gConv+=cv; gday[d]=(gday[d]||0)+inv;});
-  const roas=S.inv?S.fat/S.inv:0, cpaM=S.vd?S.inv/S.vd:0, ticket=S.vd?S.fat/S.vd:0;
-  const temGoogle=gc.length>0;
+  const roas=S.inv?S.fat/S.inv:0, ticket=S.vd?S.fat/S.vd:0, cpv=S.vd?S.inv/S.vd:0, txc=S.vis?S.vd/S.vis*100:0;
+  // KPIs (igual ao Looker)
   document.getElementById('rl-kpis').innerHTML=[
-    ['Investimento'+(temGoogle?' total':''),BRL(S.inv+gInv)],['Faturamento',BRL(S.fat)],['ROAS',roas.toFixed(2)+'x'],
-    ['Vendas',S.vd.toLocaleString('pt-BR')],['Ticket médio',BRL(ticket)],['CPA',BRL(cpaM)]
+    ['Faturamento',BRL(S.fat)],['Ticket médio',BRL(ticket)],['Investimento',BRL(S.inv)],
+    ['Tx conversão',pct(txc)],['Vendas',S.vd.toLocaleString('pt-BR')],['Custo por venda',BRL(cpv)],['ROAS',roas.toFixed(2)+'x']
   ].map(k=>`<div class="kpi"><div class="lbl">${k[0]}</div><div class="val">${k[1]}</div></div>`).join('');
-  // Faturamento (barras, eixo esq) x Investimento (linha na frente, eixo dir)
-  const dC={labels:md.map(r=>r[0]),datasets:[
-    {type:'bar',label:'Faturamento',data:md.map(r=>r[8]),backgroundColor:'#1b5540',borderRadius:2,order:2,yAxisID:'y'},
-    {type:'line',label:'Investimento',data:md.map(r=>r[1]),borderColor:'#F07A1F',backgroundColor:'#F07A1F',borderWidth:2.5,pointRadius:0,tension:.3,order:0,yAxisID:'y1'}]};
+  // Funil do e-commerce estilizado (conversao entre etapas + custo por etapa)
+  const F=[
+    {n:'Impressões',v:S.imp,w:100,cost:[['CPM',S.imp?S.inv/S.imp*1000:0]]},
+    {n:'Cliques',v:S.clk,w:86,conv:['CTR',S.imp?S.clk/S.imp*100:0],cost:[['CPC',S.clk?S.inv/S.clk:0]]},
+    {n:'Visitas no site',v:S.vis,w:72,conv:['Conversão',S.clk?S.vis/S.clk*100:0],cost:[['Custo/visita',S.vis?S.inv/S.vis:0]]},
+    {n:'Add ao carrinho',v:S.atc,w:58,conv:['Conversão',S.vis?S.atc/S.vis*100:0],cost:[['Custo/carrinho',S.atc?S.inv/S.atc:0]]},
+    {n:'Checkout',v:S.chk,w:45,conv:['Conversão',S.atc?S.chk/S.atc*100:0],cost:[['Custo/checkout',S.chk?S.inv/S.chk:0]]},
+    {n:'Vendas',v:S.vd,w:33,conv:['Conversão',S.chk?S.vd/S.chk*100:0],cost:[['Custo/venda',S.vd?S.inv/S.vd:0]]}
+  ];
+  document.getElementById('rl-funnel').innerHTML=F.map((s,i)=>`
+    <div class="efstep">
+      <div class="efconv">${s.conv?`${pct(s.conv[1])}<small>${s.conv[0]}</small>`:''}</div>
+      <div class="efbar" style="width:${s.w}%;background:${FC2[i]}"><b>${s.v.toLocaleString('pt-BR')}</b><span>${s.n}</span></div>
+      <div class="efcost">${s.cost.map(c=>`<div class="pill2">${BRL(c[1])}<small>${c[0]}</small></div>`).join('')}</div>
+    </div>`).join('');
+  // ROAS diario: barras empilhadas (Investimento + Faturamento) + linha ROAS + referencias ideal/minimo
+  const labels=md.map(r=>r[0]);
+  const dRoas=md.map(r=>r[1]?+(r[8]/r[1]).toFixed(2):0);
+  const dC={labels,datasets:[
+    {type:'bar',label:'Investimento',data:md.map(r=>r[1]),backgroundColor:'#1b5540',stack:'s',order:3,yAxisID:'y'},
+    {type:'bar',label:'Faturamento',data:md.map(r=>r[8]),backgroundColor:'#F07A1F',stack:'s',order:3,yAxisID:'y'},
+    {type:'line',label:'ROAS',data:dRoas,borderColor:'#0d2a20',backgroundColor:'#0d2a20',borderWidth:3,tension:.35,pointRadius:3,yAxisID:'y1',order:0},
+    {type:'line',label:'ROAS ideal',data:labels.map(()=>5),borderColor:'#1a7a4c',borderDash:[6,4],borderWidth:1.5,pointRadius:0,yAxisID:'y1',order:1},
+    {type:'line',label:'ROAS mínimo',data:labels.map(()=>3),borderColor:'#c0392b',borderDash:[6,4],borderWidth:1.5,pointRadius:0,yAxisID:'y1',order:1}
+  ]};
   const oC={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    plugins:{legend:{position:'top',labels:{boxWidth:12}},tooltip:tipMoney},
-    scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14}},
-      y:{position:'left',beginAtZero:true,ticks:{callback:v=>'R$ '+(v/1000).toLocaleString('pt-BR')+'k'},grid:{color:'#eef2f0'}},
-      y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{callback:v=>'R$ '+v.toLocaleString('pt-BR')}}}};
+    plugins:{legend:{position:'top',labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>/ROAS/.test(c.dataset.label)?c.dataset.label+': '+c.parsed.y.toFixed(2)+'x':c.dataset.label+': '+BRL(c.parsed.y)}}},
+    scales:{x:{stacked:true,grid:{display:false},ticks:{maxTicksLimit:16}},
+      y:{stacked:true,position:'left',beginAtZero:true,ticks:{callback:v=>'R$ '+(v/1000).toLocaleString('pt-BR')+'k'},grid:{color:'#eef2f0'}},
+      y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{callback:v=>v+'x'}}}};
   if(relC){relC.data=dC;relC.options=oC;relC.update();}else relC=new Chart(document.getElementById('relChart'),{data:dC,options:oC});
-  // Google por campanha (estado vazio quando a fonte de Google ainda nao foi atualizada)
-  const cardGday=document.getElementById('card-gday');
-  if(temGoogle){
-    cardGday.style.display='';
-    document.getElementById('rl-gcamp').innerHTML=Object.entries(camp).sort((a,b)=>b[1][0]-a[1][0]).map(([c,a])=>{
-      const cpa=a[3]?a[0]/a[3]:0, ctr=a[1]?a[2]/a[1]*100:0;
-      const cc=cpa<=20?'b-good':cpa<=35?'b-mid':'b-bad';
-      return `<tr><td class="name">${c}</td><td>${BRL(a[0])}</td><td>${a[3].toLocaleString('pt-BR')}</td><td><span class="badge ${cc}">${BRL(cpa)}</span></td><td>${ctr.toFixed(1)}%</td></tr>`;
-    }).join('');
-    const gd=Object.entries(gday);
-    const dG={labels:gd.map(x=>x[0]),datasets:[{label:'Investimento Google',data:gd.map(x=>Math.round(x[1])),backgroundColor:'#F07A1F',borderRadius:2}]};
-    const oG={maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tipMoney},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:12}},y:{beginAtZero:true,ticks:{callback:v=>'R$ '+v.toLocaleString('pt-BR')},grid:{color:'#eef2f0'}}}};
-    if(relG){relG.data=dG;relG.options=oG;relG.update();}else relG=new Chart(document.getElementById('relGChart'),{type:'bar',data:dG,options:oG});
-  } else {
-    document.getElementById('rl-gcamp').innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:22px">📊 Dados do Google entram assim que a fonte for atualizada.</td></tr>';
-    cardGday.style.display='none';
-  }
-  // funil
-  const st=[['Cliques',S.clk],['Visitas',S.vis],['Carrinho',S.atc],['Checkout',S.chk],['Vendas',S.vd]];
-  const mxv=st[0][1]||1;
-  document.getElementById('rl-funnel').innerHTML=st.map((s,i)=>{const w=Math.max(8,s[1]/mxv*100);const c=i>0&&st[i-1][1]?((s[1]/st[i-1][1])*100).toFixed(1)+'%':'—';return `<div class="fstep"><div class="fname">${s[0]}</div><div class="fbar" style="width:${w}%;background:${FCOL[i]}">${s[1].toLocaleString('pt-BR')}</div><div class="fmeta">${c}</div></div>`;}).join('');
-  // tabela Meta
-  document.getElementById('rl-tbody').innerHTML=md.map(r=>{const roas=r[1]?r[8]/r[1]:0;const rc=roas>=5?'b-good':roas>=3?'b-mid':'b-bad';return `<tr><td class="name">${r[0]}</td><td>${BRL(r[1])}</td><td>${r[3].toLocaleString('pt-BR')}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td style="color:var(--green);font-weight:700">${BRL(r[8])}</td><td><span class="badge ${rc}">${roas.toFixed(2)}x</span></td></tr>`;}).join('');
+  // Tabela diaria
+  document.getElementById('rl-tbody').innerHTML=md.map(r=>{const rr=r[1]?r[8]/r[1]:0;const rc=rr>=5?'b-good':rr>=3?'b-mid':'b-bad';return `<tr><td class="name">${r[0]}</td><td>${BRL(r[1])}</td><td>${r[3].toLocaleString('pt-BR')}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td style="color:var(--green);font-weight:700">${BRL(r[8])}</td><td><span class="badge ${rc}">${rr.toFixed(2)}x</span></td></tr>`;}).join('');
 }
-rsel.onchange=relatorio; relatorio();
+rDe.onchange=relatorio; rAte.onchange=relatorio;
+document.getElementById('rl-tudo').onclick=()=>{rDe.value=minISO;rAte.value=maxISO;relatorio();};
+relatorio();
 </script>
 </body>
 </html>
