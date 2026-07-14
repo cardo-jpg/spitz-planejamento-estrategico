@@ -273,21 +273,16 @@
   <!-- ================= RECONHECIMENTO / MARCA ================= -->
   <div class="pane" id="marca">
     <div class="grid"><div class="card full">
-      <h2>Campanhas de Marca <span class="tag">reconhecimento · alcance · seguidores</span></h2>
-      <div class="hint">Estas campanhas são de <b>marca</b> — avaliadas por <b>alcance, CPM e crescimento</b>, não por ROAS. Verba institucional, separada da performance de venda.</div>
+      <h2>Campanhas de Marca <span class="tag">alcance · reconhecimento</span></h2>
+      <div class="hint">Avaliadas por <b>alcance, CPM e qualidade do criativo</b> — não por ROAS. <b>Hook Rate</b> = quantos foram fisgados nos primeiros segundos (3s ÷ impressões). <b>Retenção 75%</b> = dos fisgados, quantos assistiram até quase o fim.</div>
     </div></div>
     <div class="grid kpis kpis7" id="mk-kpis"></div>
-    <div class="grid cols">
-      <div class="card"><h2>Reconhecimento / Alcance <span class="tag">Aberto 200km</span></h2>
-        <div class="hint">Público frio amplo, otimizado para alcance</div>
-        <table><tbody id="mk-recon"></tbody></table>
-      </div>
-      <div class="card"><h2>Seguidores <span class="tag">crescimento de perfil</span></h2>
-        <div class="hint">Campanha de crescimento no Instagram</div>
-        <table><tbody id="mk-seg"></tbody></table>
-      </div>
-    </div>
-    <div class="note">📥 Faltam os dados diários de <b>impressões, engajamento e seguidores/dia</b> (e a campanha de Engajamento) para completar esta aba com gráficos. Me manda o export dessas campanhas de marca que eu ligo aqui.</div>
+    <div class="grid"><div class="card full">
+      <h2>Criativos de marca <span class="tag">qualidade</span></h2>
+      <div class="hint">🎬 vídeo · 🖼️ imagem (imagem não tem hook/retenção). Clique no criativo para abrir o anúncio. Cabeçalho ordena.</div>
+      <div class="tblwrap"><table><thead id="th-brand"></thead><tbody id="tb-brand"></tbody></table></div>
+    </div></div>
+    <div class="note">🎬 <b>Hook Rate</b>: 🟢 ≥30% ótimo · 🟡 15–30% médio · 🔴 &lt;15% fraco (não segura no 1º segundo). <b>Retenção 75%</b>: 🟢 ≥35% · 🟡 20–35% · 🔴 &lt;20%. Imagens não têm essas métricas (só vídeo).</div>
   </div>
 
   <!-- ================= PLANO DE VERBA ================= -->
@@ -389,9 +384,10 @@
   <footer>Cardô Marketing · Dashboard Spitz Pomer · Performance · Planejamento · Plano de Verba</footer>
 </div>
 
-<script src="data.js?v=10"></script>
-<script src="meta_granular.js?v=4"></script>
-<script src="google_granular.js?v=2"></script>
+<script src="data.js?v=11"></script>
+<script src="meta_granular.js?v=5"></script>
+<script src="google_granular.js?v=3"></script>
+<script src="brand_granular.js?v=1"></script>
 <script>
 const BRL = n => 'R$ '+Math.round(n).toLocaleString('pt-BR');
 const BRL2 = n => 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -627,20 +623,32 @@ function renderTabelas(de,ate){
   tabela('th-cria','tb-cria',aggEntity(CRIAD,de,ate),cCria,stCria);
 }
 
-// Aba Marca
+// Aba Marca (Meta Ads Alcance + Reconhecimento) — qualidade de criativo
 (function(){
-  const R=BRAND.recon, G=BRAND.seg;
-  const invTot=R.inv+G.inv, custoSeg=G.seguidores?G.inv/G.seguidores:0;
+  const bH=v=>v==null?'<span style="color:#c2c2c2">—</span>':`<span class="badge ${v>=30?'b-good':v>=15?'b-mid':'b-bad'}">${v.toFixed(0)}%</span>`;
+  const bR=v=>v==null?'<span style="color:#c2c2c2">—</span>':`<span class="badge ${v>=35?'b-good':v>=20?'b-mid':'b-bad'}">${v.toFixed(0)}%</span>`;
+  const objs=BRANDCRIA.map(r=>{const[nm,inv,imp,alc,v3,inter,p25,p75,clk,vp]=r;const vid=v3>0;
+    return {nm,inv,imp,alc,v3,inter,vp,vid,cpm:imp?inv/imp*1000:0,freq:alc?imp/alc:0,hook:vid&&imp?v3/imp*100:null,ret:vid&&v3?p75/v3*100:null};});
+  const BT=objs.reduce((a,o)=>{a.inv+=o.inv;a.imp+=o.imp;a.alc+=o.alc;a.v3+=o.v3;a.inter+=o.inter;a.vp+=o.vp;a.vimp+=o.vid?o.imp:0;return a;},{inv:0,imp:0,alc:0,v3:0,inter:0,vp:0,vimp:0});
+  const hookMed=BT.vimp?BT.v3/BT.vimp*100:0;
   document.getElementById('mk-kpis').innerHTML=[
-    ['Investimento marca',BRL(invTot)],['Alcance',(R.alcance/1e6).toFixed(2).replace('.',',')+' mi'],
-    ['Custo/mil alcance',BRL(R.cpmAlc)],['Frequência',R.freq.toFixed(2).replace('.',',')],
-    ['Seguidores',fmtN(G.seguidores)],['Custo/seguidor',BRL(custoSeg)],['Cliques (seg.)',fmtN(G.cliques)]
+    ['Investimento',BRL(BT.inv)],['Impressões',fmtN(BT.imp)],['Alcance',fmtN(BT.alc)],
+    ['Frequência',BT.alc?(BT.imp/BT.alc).toFixed(2).replace('.',','):'—'],['CPM',BRL2(BT.imp?BT.inv/BT.imp*1000:0)],
+    ['Hook médio (vídeo)',hookMed.toFixed(0)+'%'],['Visitas ao perfil',fmtN(BT.vp)]
   ].map(k=>`<div class="kpi"><div class="lbl">${k[0]}</div><div class="val">${k[1]}</div></div>`).join('');
-  const linha=(a,b)=>`<tr><td class="name">${a}</td><td style="text-align:right">${b}</td></tr>`;
-  document.getElementById('mk-recon').innerHTML=
-    linha('Investimento',BRL(R.inv))+linha('Alcance',fmtN(R.alcance))+linha('Custo por mil alcançados',BRL(R.cpmAlc))+linha('Frequência',R.freq.toFixed(2).replace('.',','));
-  document.getElementById('mk-seg').innerHTML=
-    linha('Investimento',BRL(G.inv))+linha('Seguidores ganhos',fmtN(G.seguidores))+linha('Custo por seguidor',BRL(custoSeg))+linha('Cliques',fmtN(G.cliques))+linha('CTR',pctBR(G.ctr));
+  const cB=[
+    ['Criativo',o=>`<td class="name">${o.vid?'🎬':'🖼️'} ${BRAND_URL[o.nm]?`<a href="${BRAND_URL[o.nm]}" target="_blank" rel="noopener" style="color:var(--orange-d);text-decoration:underline">${o.nm} ↗</a>`:o.nm}</td>`,o=>o.nm],
+    ['Investido',o=>`<td style="font-weight:800;color:var(--ink)">${BRL(o.inv)}</td>`,o=>o.inv],
+    ['Impr.',o=>`<td>${fmtN(o.imp)}</td>`,o=>o.imp],
+    ['Alcance',o=>`<td>${fmtN(o.alc)}</td>`,o=>o.alc],
+    ['Freq',o=>`<td>${o.freq.toFixed(2).replace('.',',')}</td>`,o=>o.freq],
+    ['CPM',o=>`<td>${BRL2(o.cpm)}</td>`,o=>o.cpm],
+    ['Hook',o=>`<td>${bH(o.hook)}</td>`,o=>o.hook==null?-1:o.hook],
+    ['Ret. 75%',o=>`<td>${bR(o.ret)}</td>`,o=>o.ret==null?-1:o.ret],
+    ['Interações',o=>`<td>${fmtN(o.inter)}</td>`,o=>o.inter],
+    ['Visitas',o=>`<td>${fmtN(o.vp)}</td>`,o=>o.vp]
+  ];
+  tabela('th-brand','tb-brand',objs,cB,{i:1,dir:-1});
 })();
 
 /* ============ ABA GOOGLE ============ */

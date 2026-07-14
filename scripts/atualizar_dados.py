@@ -107,6 +107,29 @@ open(os.path.join(ROOT, "google_granular.js"), "w", encoding="utf-8", newline="\
 ginv = sum(x[2] for x in GCAMPD); gfat = sum(x[6] for x in GCAMPD); gvd = sum(x[5] for x in GCAMPD)
 print(f"GOOGLE camp {len(GCAMPD)} | kw {len(GKWD)} | loc {len(GLOCD)} | inv R${ginv:,.2f} | fat R${gfat:,.2f} | vendas {gvd} | ROAS {gfat/ginv if ginv else 0:.2f}")
 
+# ---------- MARCA (abas 'Meta Ads Alcance' + ' Meta Ads Reconhecimento') por criativo ----------
+# cols: 0Data(ISO aaaa-mm-dd) 1Camp 2Pub 3Cria 4URL 5Investido 6Impressoes 7Visualizacoes
+#       8Alcance 9Vis3s 10Interacoes 11:25% 12:75% 13Cliques 14VisitasPerfil
+VALIDISO = set(f"{d[6:10]}-{d[3:5]}-{d[0:2]}" for d in VALID)  # DD/MM/AAAA -> AAAA-MM-DD
+brand_rows = fetch("Meta Ads Alcance")[1:] + fetch(" Meta Ads Reconhecimento")[1:]
+bagg = {}; burl = {}
+for r in brand_rows:
+    if len(r) < 15 or not r[0] or r[0] not in VALIDISO: continue
+    nm = r[3].strip()
+    if not nm: continue
+    a = bagg.setdefault(nm, [0.0]*9)  # inv,impr,alc,vis3s,inter,p25,p75,clk,visperfil
+    for i, ci in enumerate((5,6,8,9,10,11,12,13,14)): a[i] += num(r[ci])
+    if r[4].strip().startswith("http"): burl.setdefault(nm, r[4].strip())
+BRANDCRIA = [[nm, round(v[0],2), int(v[1]), int(v[2]), int(v[3]), int(v[4]), int(v[5]), int(v[6]), int(v[7]), int(v[8])]
+             for nm, v in bagg.items()]
+outb = "// ===== Marca (Meta Ads Alcance + Reconhecimento) por criativo =====\n"
+outb += "// [criativo, investido, impressoes, alcance, vis3s, interacoes, p25, p75, cliques, visitas_perfil]\n"
+outb += "const BRANDCRIA=" + json.dumps(BRANDCRIA, ensure_ascii=False) + ";\n"
+outb += "const BRAND_URL=" + json.dumps(burl, ensure_ascii=False) + ";\n"
+open(os.path.join(ROOT, "brand_granular.js"), "w", encoding="utf-8", newline="\n").write(outb)
+binv = sum(x[1] for x in BRANDCRIA); bimp = sum(x[2] for x in BRANDCRIA)
+print(f"MARCA: {len(BRANDCRIA)} criativos | inv R${binv:,.2f} | impressoes {bimp:,}")
+
 # ---------- grava data.js (so' o bloco METAD) ----------
 dj = open(os.path.join(ROOT, "data.js"), encoding="utf-8").read()
 metad_js = "const METAD=[\n" + ",\n".join(json.dumps(x, ensure_ascii=False) for x in METAD) + "\n];"
