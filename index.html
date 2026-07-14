@@ -111,7 +111,8 @@
 
   <div class="tabs">
     <div class="tab" data-t="perf">📊 Análise</div>
-    <div class="tab active" data-t="rel">📈 Dashboard</div>
+    <div class="tab active" data-t="rel">📈 Meta</div>
+    <div class="tab" data-t="google">🔍 Google</div>
     <div class="tab" data-t="marca">📣 Reconhecimento</div>
     <div class="tab" data-t="plano">🚀 Planejamento</div>
     <div class="tab" data-t="plan">💰 Plano de Verba</div>
@@ -225,6 +226,42 @@
       <div class="hint">Clique no <b>nome do criativo</b> para abrir o anúncio no Instagram. Cabeçalho ordena.</div>
       <div class="tblwrap"><table><thead id="th-cria"></thead><tbody id="tb-cria"></tbody></table></div>
     </div></div>
+  </div>
+
+  <!-- ================= GOOGLE ADS ================= -->
+  <div class="pane" id="google">
+    <div class="grid"><div class="card full">
+      <h2>Centro de Inteligência — Google Ads <span class="tag">Search</span></h2>
+      <div class="hint">Agora com faturamento → <b>ROAS mensurável</b>. ⚠️ Não somar com o Meta: a atribuição se sobrepõe (a mesma venda pode ser contada nos dois).</div>
+      <div class="controls">
+        <div class="ctl"><label>De</label><input type="date" id="g-de"></div>
+        <div class="ctl"><label>Até</label><input type="date" id="g-ate"></div>
+        <button class="btn ghost" id="g-tudo">↺ Período todo</button>
+      </div>
+    </div></div>
+
+    <div class="grid kpis kpis7" id="g-kpis"></div>
+
+    <div class="grid"><div class="card full">
+      <h2>Investimento × Faturamento <span class="tag">diário</span></h2>
+      <div class="hint">Barras: Investimento + Faturamento · linha: ROAS</div>
+      <div class="chart-box" style="height:300px"><canvas id="gChart"></canvas></div>
+    </div></div>
+
+    <div class="grid"><div class="card full">
+      <h2>Por campanha <span class="tag">filtra por data</span></h2>
+      <div class="hint">Clique no cabeçalho para ordenar. Heatmap em CPA e ROAS.</div>
+      <div class="tblwrap"><table><thead id="th-gcamp"></thead><tbody id="tb-gcamp"></tbody></table></div>
+    </div></div>
+
+    <div class="grid cols">
+      <div class="card"><h2>Palavras-chave</h2><div class="hint">Termos que trouxeram cliques e vendas</div>
+        <div class="tblwrap"><table><thead id="th-gkw"></thead><tbody id="tb-gkw"></tbody></table></div>
+      </div>
+      <div class="card"><h2>Localizações <span class="tag">por estado</span></h2><div class="hint">De onde vieram os cliques/vendas</div>
+        <div class="tblwrap"><table><thead id="th-gloc"></thead><tbody id="tb-gloc"></tbody></table></div>
+      </div>
+    </div>
   </div>
 
   <!-- ================= RECONHECIMENTO / MARCA ================= -->
@@ -346,8 +383,9 @@
   <footer>Cardô Marketing · Dashboard Spitz Pomer · Performance · Planejamento · Plano de Verba</footer>
 </div>
 
-<script src="data.js?v=8"></script>
-<script src="meta_granular.js?v=2"></script>
+<script src="data.js?v=9"></script>
+<script src="meta_granular.js?v=3"></script>
+<script src="google_granular.js?v=1"></script>
 <script>
 const BRL = n => 'R$ '+Math.round(n).toLocaleString('pt-BR');
 const kBRL = n => 'R$ '+(n/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+'k';
@@ -600,8 +638,63 @@ function renderTabelas(de,ate){
     linha('Investimento',BRL(G.inv))+linha('Seguidores ganhos',fmtN(G.seguidores))+linha('Custo por seguidor',BRL(custoSeg))+linha('Cliques',fmtN(G.cliques))+linha('CTR',pctBR(G.ctr));
 })();
 
+/* ============ ABA GOOGLE ============ */
+const gDe=document.getElementById('g-de'), gAte=document.getElementById('g-ate');
+const gIso=GCAMPD.map(r=>toISO(r[0])).sort();
+const gMin=gIso[0], gMax=gIso[gIso.length-1];
+[gDe,gAte].forEach(i=>{i.min=gMin;i.max=gMax;}); gDe.value=gMin; gAte.value=gMax;
+function googleAgg(rows,de,ate){
+  const m={};
+  for(const r of rows){const i=toISO(r[0]); if(i<de||i>ate) continue; let a=m[r[1]]; if(!a) a=m[r[1]]=[0,0,0,0,0]; a[0]+=r[2];a[1]+=r[3];a[2]+=r[4];a[3]+=r[5];a[4]+=r[6];}
+  return Object.keys(m).map(name=>{const a=m[name],inv=a[0],imp=a[1],clk=a[2],vd=a[3],fat=a[4];return {name,inv,imp,clk,vd,fat,cpc:clk?inv/clk:0,ctr:imp?clk/imp*100:0,cpa:vd?inv/vd:0,roas:inv?fat/inv:0};});
+}
+const gMetric=[
+ ['Investido',o=>`<td>${BRL(o.inv)}</td>`,o=>o.inv],
+ ['Impr.',o=>`<td>${fmtN(o.imp)}</td>`,o=>o.imp],
+ ['Cliques',o=>`<td>${fmtN(o.clk)}</td>`,o=>o.clk],
+ ['CPC',o=>`<td>${o.clk?BRL(o.cpc):'—'}</td>`,o=>o.cpc],
+ ['CTR',o=>`<td>${pctBR(o.ctr)}</td>`,o=>o.ctr],
+ ['Vendas',o=>`<td>${o.vd}</td>`,o=>o.vd],
+ ['CPA',o=>`<td ${o.vd?heatCpv(o.cpa):''}>${o.vd?BRL(o.cpa):'—'}</td>`,o=>o.cpa],
+ ['Faturamento',o=>`<td style="color:var(--green);font-weight:700">${BRL(o.fat)}</td>`,o=>o.fat],
+ ['ROAS',o=>`<td ${heatRoas(o.roas)}>${o.roas.toFixed(1)}x</td>`,o=>o.roas]
+];
+const gcCamp=[['Campanha',o=>`<td class="name">${o.name}</td>`,o=>o.name],...gMetric];
+const gcKw=[['Palavra-chave',o=>`<td class="name">${o.name}</td>`,o=>o.name],...gMetric];
+const gcLoc=[['Estado',o=>`<td class="name">${o.name}</td>`,o=>o.name],...gMetric];
+const stG={i:1,dir:-1},stGk={i:1,dir:-1},stGl={i:1,dir:-1};
+let gChart;
+function googleTab(){
+  const de=gDe.value||gMin, ate=gAte.value||gMax;
+  const rows=GCAMPD.filter(r=>{const i=toISO(r[0]);return i>=de&&i<=ate;});
+  const T=rows.reduce((a,r)=>{a.inv+=r[2];a.imp+=r[3];a.clk+=r[4];a.vd+=r[5];a.fat+=r[6];return a;},{inv:0,imp:0,clk:0,vd:0,fat:0});
+  const roas=T.inv?T.fat/T.inv:0,cpa=T.vd?T.inv/T.vd:0,cpc=T.clk?T.inv/T.clk:0,ctr=T.imp?T.clk/T.imp*100:0;
+  document.getElementById('g-kpis').innerHTML=[
+    ['Investimento',BRL(T.inv)],['Faturamento',BRL(T.fat)],['ROAS',roas.toFixed(2)+'x'],
+    ['Vendas',fmtN(T.vd)],['CPA',BRL(cpa)],['CPC',BRL(cpc)],['CTR',pctBR(ctr)]
+  ].map(k=>`<div class="kpi"><div class="lbl">${k[0]}</div><div class="val">${k[1]}</div></div>`).join('');
+  tabela('th-gcamp','tb-gcamp',googleAgg(GCAMPD,de,ate),gcCamp,stG);
+  tabela('th-gkw','tb-gkw',googleAgg(GKWD,de,ate),gcKw,stGk);
+  tabela('th-gloc','tb-gloc',googleAgg(GLOCD,de,ate),gcLoc,stGl);
+  const byDay={};
+  rows.forEach(r=>{const a=byDay[r[0]]||(byDay[r[0]]=[0,0]); a[0]+=r[2]; a[1]+=r[6];});
+  const days=Object.keys(byDay).sort((a,b)=>{const pa=a.split('/'),pb=b.split('/');return (pa[1]-pb[1])||(pa[0]-pb[0]);});
+  const dC={labels:days,datasets:[
+    {type:'bar',label:'Investimento',data:days.map(d=>byDay[d][0]),backgroundColor:'#1b5540',stack:'s',order:3,yAxisID:'y'},
+    {type:'bar',label:'Faturamento',data:days.map(d=>byDay[d][1]),backgroundColor:'#F07A1F',stack:'s',order:3,yAxisID:'y'},
+    {type:'line',label:'ROAS',data:days.map(d=>byDay[d][0]?+(byDay[d][1]/byDay[d][0]).toFixed(2):0),borderColor:'#0d2a20',backgroundColor:'#0d2a20',borderWidth:3,tension:.35,pointRadius:3,yAxisID:'y1',order:0}
+  ]};
+  const oC={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>/ROAS/.test(c.dataset.label)?c.dataset.label+': '+c.parsed.y.toFixed(2)+'x':c.dataset.label+': '+BRL(c.parsed.y)}}},
+    scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,position:'left',beginAtZero:true,ticks:{callback:v=>'R$ '+(v/1000).toLocaleString('pt-BR')+'k'},grid:{color:'#eef2f0'}},y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{callback:v=>v+'x'}}}};
+  if(gChart){gChart.data=dC;gChart.options=oC;gChart.update();}else gChart=new Chart(document.getElementById('gChart'),{data:dC,options:oC});
+}
+gDe.onchange=googleTab; gAte.onchange=googleTab;
+document.getElementById('g-tudo').onclick=()=>{gDe.value=gMin;gAte.value=gMax;googleTab();};
+
 // dispara o render inicial (agora que renderTabelas e as tabelas estao definidas)
 relatorio();
+googleTab();
 </script>
 </body>
 </html>

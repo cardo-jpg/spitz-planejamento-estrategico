@@ -36,15 +36,8 @@ def num(s):
 def dm(d):
     p = d.split("/"); return p[0] + "/" + p[1] if len(p) >= 2 else d
 
-# ---------- METAD (aba Somatorio) ----------
-som = fetch("Somatório")[1:]
-METAD = []
-for r in som:
-    if len(r) < 9 or not r[0] or not r[0].endswith("/2026"): continue
-    inv = num(r[1])
-    if inv <= 0: continue  # so' dias com dado real
-    METAD.append([dm(r[0]), round(inv,2), int(num(r[2])), int(num(r[3])), int(num(r[4])),
-                  int(num(r[5])), int(num(r[6])), int(num(r[7])), round(num(r[8]),2)])
+# ATENCAO: a aba 'Somatorio' agora SOMA Meta+Google -> faturamento/vendas double-count
+# (atribuicao se sobrepoe). Por isso METAD e' derivado da aba 'Meta Ads' (Meta puro), abaixo.
 
 # ---------- Granular (abas Meta Ads*) ----------
 camp = fetch("Meta Ads")[1:]
@@ -75,6 +68,44 @@ PUBD = agg(fetch("Meta Ads - Público")[1:], 2, (3,4,5,7,9,11,12))
 CRIAD = agg(fetch("Meta Ads - Criativos")[1:], 3, (4,5,6,8,10,12,13))
 crioms = set(r[1] for r in CRIAD)
 CRIA_URL = {k: v for k, v in cria_url.items() if k in crioms}
+
+# ---------- METAD = aba 'Meta Ads' agregada por DIA (Meta puro, funil completo) ----------
+# Meta Ads: 0Data 1Camp 2Inv 3Imp 4Clk 5Vis 6Add 7vAdd 8Chk 9Vd 10Fat
+mday = {}
+for r in camp:
+    if not r or not r[0] or r[0] not in VALID or len(r) < 11: continue
+    a = mday.setdefault(dm(r[0]), [0.0]*8)
+    for i, ci in enumerate((2,3,4,5,6,8,9,10)): a[i] += num(r[ci])
+METAD = [[k, round(v[0],2), int(v[1]), int(v[2]), int(v[3]), int(v[4]), int(v[5]), int(v[6]), round(v[7],2)]
+         for k, v in sorted(mday.items(), key=lambda x: (x[0][3:5], x[0][:2]))]
+
+# ---------- Google Search (abas GG Search *) ----------
+gcamp = fetch("GG Search - Campanhas")[1:]
+GVALID = set(r[0] for r in gcamp if r and r[0] and r[0].endswith("/2026"))
+
+def gagg(rows, name_idx, cols):  # cols = (inv,imp,clk,vd,fat) indices -> [data,nome,inv,imp,clk,vd,fat]
+    m = {}
+    for r in rows:
+        if not r or not r[0] or r[0] not in GVALID or len(r) <= max(name_idx, *cols): continue
+        nm = r[name_idx].strip()
+        if not nm: continue
+        a = m.setdefault((dm(r[0]), nm), [0.0]*5)
+        for i, ci in enumerate(cols): a[i] += num(r[ci])
+    return [[k[0], k[1], round(v[0],2), int(v[1]), int(v[2]), int(v[3]), round(v[4],2)] for k, v in m.items()]
+
+# GG camp: 0Data 1Camp 2Inv 3Imp 4Clk 5Vd 6Fat ; kw: 0Data 1Palavra 2Inv 3Imp 4Clk 5Vd 6Fat ; loc: +7Estado
+GCAMPD = gagg(gcamp, 1, (2,3,4,5,6))
+GKWD = gagg(fetch("GG Search - Palavras-chave")[1:], 1, (2,3,4,5,6))
+GLOCD = gagg(fetch("GG Search - Localizações")[1:], 7, (2,3,4,5,6))
+
+outg = "// ===== Google Search diario (fonte: [SP] Fonte de dados Ecom, abas GG Search *) =====\n"
+outg += "// [data, nome, inv, imp, clk, vendas, faturamento]\n"
+outg += "const GCAMPD=" + json.dumps(GCAMPD, ensure_ascii=False) + ";\n"
+outg += "const GKWD=" + json.dumps(GKWD, ensure_ascii=False) + ";\n"
+outg += "const GLOCD=" + json.dumps(GLOCD, ensure_ascii=False) + ";\n"
+open(os.path.join(ROOT, "google_granular.js"), "w", encoding="utf-8", newline="\n").write(outg)
+ginv = sum(x[2] for x in GCAMPD); gfat = sum(x[6] for x in GCAMPD); gvd = sum(x[5] for x in GCAMPD)
+print(f"GOOGLE camp {len(GCAMPD)} | kw {len(GKWD)} | loc {len(GLOCD)} | inv R${ginv:,.2f} | fat R${gfat:,.2f} | vendas {gvd} | ROAS {gfat/ginv if ginv else 0:.2f}")
 
 # ---------- grava data.js (so' o bloco METAD) ----------
 dj = open(os.path.join(ROOT, "data.js"), encoding="utf-8").read()
