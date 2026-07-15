@@ -210,7 +210,7 @@
       <div class="hint">Role para ver todos os dias do período</div>
       <div class="tblwrap" style="max-height:360px">
         <table id="rl-table"><thead><tr>
-          <th>Data</th><th>Invest.</th><th>Cliques</th><th>Carrinho</th><th>Checkout</th><th>Vendas</th><th>Faturamento</th><th>ROAS</th>
+          <th>Data</th><th>Invest.</th><th>Cliques</th><th>Carrinho</th><th>Checkout</th><th>Vendas</th><th>CPA</th><th>Faturamento</th><th>ROAS</th>
         </tr></thead><tbody id="rl-tbody"></tbody></table>
       </div>
     </div></div>
@@ -590,7 +590,10 @@ function relatorio(){
       y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{callback:v=>'R$ '+v}}}};
   if(relC){relC.data=dC;relC.options=oC;relC.update();}else relC=new Chart(document.getElementById('relChart'),{data:dC,options:oC});
   // Tabela diaria
-  document.getElementById('rl-tbody').innerHTML=md.map(r=>{const rr=r[1]?r[8]/r[1]:0;const rc=rr>=5?'b-good':rr>=3?'b-mid':'b-bad';return `<tr><td class="name">${r[0]}</td><td>${BRL(r[1])}</td><td>${r[3].toLocaleString('pt-BR')}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td style="color:var(--green);font-weight:700">${BRL(r[8])}</td><td><span class="badge ${rc}">${rr.toFixed(2)}x</span></td></tr>`;}).join('');
+  document.getElementById('rl-tbody').innerHTML=md.map(r=>{
+    const rr=r[1]?r[8]/r[1]:0, rc=rr>=5?'b-good':rr>=3?'b-mid':'b-bad';
+    const cpa=r[7]?r[1]/r[7]:0, cc=cpa<=40?'b-good':cpa<=60?'b-mid':'b-bad';
+    return `<tr><td class="name">${r[0]}</td><td>${BRL(r[1])}</td><td>${r[3].toLocaleString('pt-BR')}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[7]?`<span class="badge ${cc}">${BRL2(cpa)}</span>`:'—'}</td><td style="color:var(--green);font-weight:700">${BRL(r[8])}</td><td><span class="badge ${rc}">${rr.toFixed(2)}x</span></td></tr>`;}).join('');
   if(typeof renderTabelas==='function') renderTabelas(de,ate);
 }
 rDe.onchange=relatorio; rAte.onchange=relatorio;
