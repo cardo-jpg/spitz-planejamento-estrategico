@@ -401,10 +401,21 @@
   <footer>Cardô Marketing · Dashboard Spitz Pomer · Performance · Planejamento · Plano de Verba</footer>
 </div>
 
-<script>/* carrega os dados SEMPRE frescos (cache-bust por timestamp) — a dash reflete o ultimo commit sem precisar bump de versao */
-['data.js','meta_granular.js','google_granular.js','brand_granular.js','hist2025.js'].forEach(function(f){document.write('<script src="'+f+'?t='+Date.now()+'"><\/'+'script>');});
+<script>/* histrico 2025 (estatico) + carregador AO VIVO (le a planilha direto do navegador). Cache-bust por timestamp. */
+['hist2025.js','live.js'].forEach(function(f){document.write('<script src="'+f+'?t='+Date.now()+'"><\/'+'script>');});
 </script>
 <script>
+(async function(){
+/* ---- tela de carregando enquanto puxa a planilha ao vivo ---- */
+var _ov=document.createElement('div');
+_ov.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#faf8ef;z-index:9999;font:600 17px system-ui;color:#4a5d52;text-align:center';
+_ov.innerHTML='<div><div style="width:34px;height:34px;border:4px solid #d8e0da;border-top-color:#3f7d5a;border-radius:50%;margin:0 auto 14px;animation:_spin .8s linear infinite"></div>Carregando dados ao vivo da planilha...</div>';
+var _st=document.createElement('style');_st.textContent='@keyframes _spin{to{transform:rotate(360deg)}}';document.head.appendChild(_st);
+document.body.appendChild(_ov);
+try{ await loadLiveData(); }
+catch(e){ _ov.innerHTML='<div style="max-width:420px"><b>No consegui carregar os dados da planilha.</b><br><br><small style="font-weight:400;color:#8a9a90">'+((e&&e.message)||e)+'</small><br><br><button onclick="location.reload()" style="padding:8px 18px;border:0;border-radius:8px;background:#3f7d5a;color:#fff;font-weight:600;cursor:pointer">Tentar de novo</button></div>'; return; }
+_ov.remove();
+
 const BRL = n => 'R$ '+Math.round(n).toLocaleString('pt-BR');
 const BRL2 = n => 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const kBRL = n => 'R$ '+(n/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+'k';
@@ -807,6 +818,7 @@ document.getElementById('g-tudo').onclick=()=>{gDe.value=gMin;gAte.value=gMax;go
 // dispara o render inicial (agora que renderTabelas e as tabelas estao definidas)
 relatorio();
 googleTab();
+})(); // fim do wrapper async (dados ao vivo)
 </script>
 </body>
 </html>
