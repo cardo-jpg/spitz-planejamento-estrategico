@@ -99,6 +99,50 @@
   .plan-table tr.cap td{color:var(--orange-d)}
   .plan-table tfoot td{font-weight:800;color:var(--green);border-top:2px solid var(--green);font-size:14px}
   .pill{font-size:11px;padding:2px 7px;border-radius:6px;background:#e6f4ec;color:#1a7a4c;font-weight:700}
+  /* ===== Centro de Comando ===== */
+  .card.full{grid-column:1/-1}
+  .mini{font-size:11px;font-weight:700;margin-top:4px}
+  .pbar{height:26px;border-radius:9px;background:#EEE6CF;overflow:hidden;position:relative;margin:6px 0}
+  .pbar .pf{height:100%;background:linear-gradient(90deg,var(--green2),var(--green));border-radius:9px;transition:width .6s}
+  .pbar .pp{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--orange)}
+  .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:12px}
+  .pgrid .b{text-align:center}.pgrid .n{font-size:19px;font-weight:800;color:var(--green)}.pgrid .t{font-size:11px;color:var(--muted);margin-top:2px}
+  @media(max-width:640px){.pgrid{grid-template-columns:repeat(2,1fr)}}
+  .wnow{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;border-radius:16px;padding:18px 22px;flex-wrap:wrap}
+  .wnow .we{font-size:3rem;line-height:1}.wnow .wt{font-size:1.9rem;font-weight:800}
+  .wnow .wadv{margin-left:auto;text-align:right}.wnow .wadv .big{font-size:1rem;font-weight:800}
+  .wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:9px;margin-top:12px}
+  .wday{background:#fff;border:1px solid var(--ring);border-radius:12px;padding:12px 6px;text-align:center;border-top:4px solid var(--ring)}
+  .wday.w-ok{border-top-color:#1a7a4c}.wday.w-mid{border-top-color:#b45f0a}.wday.w-bad{border-top-color:#c0392b}
+  .wday .wdn{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase}
+  .wday .wde{font-size:1.7rem;margin:5px 0 2px}.wday .wdt{font-size:13px;font-weight:700;color:var(--green)}
+  .wday .wdc{font-size:11px;color:var(--muted);margin-top:2px}
+  .wday .wds{font-size:10px;margin-top:5px;display:inline-block}
+  .acao{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px}
+  .a-esc{background:#e6f4ec;color:#1a7a4c}.a-man{background:#fff3e0;color:#b45f0a}.a-cut{background:#fdecec;color:#c0392b}
+  @media(max-width:820px){.wdays{grid-template-columns:repeat(4,1fr)}}
+  @media(max-width:480px){.wdays{grid-template-columns:repeat(2,1fr)}}
+  /* sliders de meta (arrastáveis) */
+  .metas-ctl{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:8px}
+  @media(max-width:760px){.metas-ctl{grid-template-columns:1fr}}
+  .mslider label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700;color:var(--green);margin-bottom:10px}
+  .mslider label b{color:var(--orange-d);font-size:17px}
+  .mslider input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--orange) 0%,var(--orange) 50%,#E6DCC0 50%);outline:none;cursor:pointer}
+  .mslider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--green);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.28);cursor:grab}
+  .mslider input[type=range]::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.12)}
+  .mslider input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--green);border:3px solid #fff;cursor:grab}
+  .mslider .rng{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:5px}
+  .mres{margin-top:12px;font-size:13px;font-weight:800;padding:8px 12px;background:#F7F2E4;border-radius:10px;text-align:center}
+  .mres .ok{color:#1a7a4c}.mres .bad{color:#c0392b}.mres .sep{color:var(--muted);font-weight:600;margin:0 8px}
+  .verpost{color:var(--orange-d);font-weight:800;font-size:12px;text-decoration:none;white-space:nowrap}
+  .verpost:hover{text-decoration:underline}
+  .legchips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .legchips .badge{font-size:12px}
+  .bwrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 14px}
+  .bwrap .bw{background:#F7F2E4;border-radius:12px;padding:12px 14px;font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .bwrap .bw .t{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:700;width:100%}
+  .bwrap .bw .nm{font-weight:800;color:var(--green)}
+  @media(max-width:700px){.bwrap{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -116,12 +160,73 @@
   </header>
 
   <div class="tabs">
+    <div class="tab active" data-t="cmd">🎯 Comando</div>
     <div class="tab" data-t="perf">📊 Análise</div>
-    <div class="tab active" data-t="rel">📈 Meta</div>
+    <div class="tab" data-t="rel">📈 Meta</div>
     <div class="tab" data-t="google">🔍 Google</div>
     <div class="tab" data-t="marca">📣 Reconhecimento</div>
-    <div class="tab" data-t="plano">🚀 Planejamento</div>
-    <div class="tab" data-t="plan">💰 Plano de Verba</div>
+  </div>
+
+  <!-- ================= CENTRO DE COMANDO ================= -->
+  <div class="pane active" id="cmd">
+    <div class="grid kpis" id="cmd-kpis"></div>
+
+    <div class="grid"><div class="card full">
+      <h2>🎚️ Metas — arraste para calibrar <span class="tag">ao vivo</span></h2>
+      <div class="hint">Defina o <b>CPA máximo que você aceita pagar por venda</b>. Embaixo de cada slider aparece <b>quantas campanhas batem a meta</b> (manter/escalar) e <b>quantas estão caras demais</b> (a cortar). Arraste e os números mudam na hora.</div>
+      <div class="metas-ctl">
+        <div class="mslider">
+          <label>CPA Vendas · Meta <b id="lbl-cpaMeta">R$ 30</b></label>
+          <input type="range" id="sl-cpaMeta" min="15" max="60" value="30" step="1">
+          <div class="rng"><span>R$ 15</span><span>R$ 60</span></div>
+          <div class="mres" id="res-cpaMeta">—</div>
+        </div>
+        <div class="mslider">
+          <label>CPA · Google <b id="lbl-cpaGoogle">R$ 8</b></label>
+          <input type="range" id="sl-cpaGoogle" min="3" max="20" value="8" step="1">
+          <div class="rng"><span>R$ 3</span><span>R$ 20</span></div>
+          <div class="mres" id="res-cpaGoogle">—</div>
+        </div>
+        <div class="mslider">
+          <label>Meta de vendas do mês <b id="lbl-metaVd">700</b></label>
+          <input type="range" id="sl-metaVd" min="200" max="1500" value="700" step="10">
+          <div class="rng"><span>200</span><span>1500</span></div>
+          <div class="mres" id="res-metaVd">—</div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="grid"><div class="card full">
+      <h2>💰 Pacing de verba <span class="tag">teto R$ 20k</span></h2>
+      <div id="cmd-pacing"></div>
+    </div></div>
+
+    <div class="grid"><div class="card full">
+      <h2>🌦️ Centro do clima · Pomerode <span class="tag">ao vivo</span></h2>
+      <div id="cmd-wnow"></div>
+      <div class="wdays" id="cmd-wdays"></div>
+      <div class="hint" style="margin-top:10px">🔴 chuva ≥5mm ou prob ≥70% → segure o pé nas vendas · 🟡 risco médio · 🟢 bom dia pra vender · fonte: Open-Meteo</div>
+    </div></div>
+
+    <div class="grid cols">
+      <div class="card"><h2>🎯 CPA Meta — Vendas <span class="tag" id="tag-cpaMeta">&lt; R$30</span></h2>
+        <table><thead><tr><th>Campanha</th><th>Inv</th><th>Vd</th><th>CPA</th><th>Ação</th></tr></thead><tbody id="cmd-meta"></tbody></table></div>
+      <div class="card"><h2>🎯 CPA Google <span class="tag" id="tag-cpaGoogle">&lt; R$8</span></h2>
+        <table><thead><tr><th>Campanha</th><th>Inv</th><th>Vd</th><th>CPA</th><th>Ação</th></tr></thead><tbody id="cmd-goog"></tbody></table></div>
+    </div>
+
+    <div class="grid cols">
+      <div class="card">
+        <h2>🎯 Meta de vendas do mês <span class="tag" id="meta-mes-tag">—</span></h2>
+        <div class="hint">Arraste a <b>Meta de vendas do mês</b> lá em cima. Barra verde = atingido · marca laranja = projeção fim do mês.</div>
+        <div id="meta-mes"></div>
+      </div>
+      <div class="card">
+        <h2>⚖️ Meta × Google <span class="tag">placar de eficiência</span></h2>
+        <div class="hint">Quem está vendendo mais barato neste mês — CPA e ROAS lado a lado.</div>
+        <div id="placar"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ================= ANÁLISE (histórico 2025 · filtrável) ================= -->
@@ -180,7 +285,7 @@
   </div>
 
   <!-- ================= DASHBOARD META (ao vivo) ================= -->
-  <div class="pane active" id="rel">
+  <div class="pane" id="rel">
     <div class="grid"><div class="card full">
       <h2>Centro de Inteligência — Meta Ads <span class="tag">ao vivo</span></h2>
       <div class="hint">Selecione o intervalo de datas — todos os indicadores abaixo recalculam.</div>
@@ -278,127 +383,44 @@
   <div class="pane" id="marca">
     <div class="grid"><div class="card full">
       <h2>Campanhas de Marca <span class="tag">alcance · reconhecimento</span></h2>
-      <div class="hint">Avaliadas por <b>alcance, CPM e qualidade do criativo</b> — não por ROAS. <b>Hook Rate</b> = fisgados nos 1ºs segundos (3s ÷ impressões). <b>Retenção 75%</b> = dos fisgados, quantos assistiram até quase o fim.</div>
+      <div class="hint">Topo de funil — avaliadas por <b>alcance, CPM e qualidade do criativo</b>, não por ROAS (elas não vendem direto, criam desejo e alimentam a busca de marca).</div>
       <div class="controls">
         <div class="ctl"><label>De</label><input type="date" id="mk-de"></div>
         <div class="ctl"><label>Até</label><input type="date" id="mk-ate"></div>
         <button class="btn ghost" id="mk-tudo">↺ Período todo</button>
       </div>
     </div></div>
+
+    <!-- LEGENDA visual -->
+    <div class="grid cols">
+      <div class="card"><h2>🎬 Hook Rate <span class="tag">fisga nos 3s</span></h2>
+        <div class="hint">Dos que viram o anúncio, quantos <b>ficaram nos 3 primeiros segundos</b> (3s ÷ impressões). Mede se o começo prende.</div>
+        <div class="legchips"><span class="badge b-good">🟢 ótimo ≥ 30%</span><span class="badge b-mid">🟡 médio 15–30%</span><span class="badge b-bad">🔴 fraco &lt; 15%</span></div>
+      </div>
+      <div class="card"><h2>⏱️ Retenção 75% <span class="tag">assiste até o fim</span></h2>
+        <div class="hint">Dos fisgados, quantos <b>assistiram até 75%</b> do vídeo (p75 ÷ 3s). Mede se o conteúdo segura.</div>
+        <div class="legchips"><span class="badge b-good">🟢 ótimo ≥ 35%</span><span class="badge b-mid">🟡 médio 20–35%</span><span class="badge b-bad">🔴 fraco &lt; 20%</span></div>
+      </div>
+    </div>
+
     <div class="grid"><div class="card full">
       <h2>🎯 Alcance <span class="tag" id="alc-tag"></span></h2>
-      <div class="hint" id="alc-sum"></div>
-      <div class="hint">🎬 vídeo · 🖼️ imagem · clique no criativo para abrir o anúncio · cabeçalho ordena.</div>
+      <div class="grid kpis" id="alc-kpis" style="margin-top:2px"></div>
+      <div id="alc-bw" class="bwrap"></div>
+      <div class="hint">🎬 vídeo · 🖼️ imagem · clique no criativo (ou <b>↗</b>) pra abrir o post no Instagram · cabeçalho ordena.</div>
       <div class="tblwrap"><table><thead id="th-alc"></thead><tbody id="tb-alc"></tbody></table></div>
     </div></div>
 
     <div class="grid"><div class="card full">
       <h2>📣 Reconhecimento <span class="tag" id="rec-tag"></span></h2>
-      <div class="hint" id="rec-sum"></div>
-      <div class="hint">🎬 vídeo · 🖼️ imagem · clique no criativo para abrir o anúncio · cabeçalho ordena.</div>
+      <div class="grid kpis" id="rec-kpis" style="margin-top:2px"></div>
+      <div id="rec-bw" class="bwrap"></div>
+      <div class="hint">🎬 vídeo · 🖼️ imagem · clique no criativo (ou <b>↗</b>) pra abrir o post no Instagram · cabeçalho ordena.</div>
       <div class="tblwrap"><table><thead id="th-rec"></thead><tbody id="tb-rec"></tbody></table></div>
     </div></div>
-
-    <div class="note">🎬 <b>Hook Rate</b>: 🟢 ≥30% ótimo · 🟡 15–30% médio · 🔴 &lt;15% fraco (não segura no 1º segundo). <b>Retenção 75%</b>: 🟢 ≥35% · 🟡 20–35% · 🔴 &lt;20%. Imagens não têm essas métricas (só vídeo).</div>
   </div>
 
-  <!-- ================= PLANO DE VERBA ================= -->
-  <div class="pane" id="plan">
-    <div class="grid kpis" style="grid-template-columns:repeat(3,1fr)">
-      <div class="kpi"><div class="lbl">Verba total / ano</div><div class="val" id="k-ano">—</div></div>
-      <div class="kpi"><div class="lbl">Meta / ano</div><div class="val">R$ <span id="k-meta">—</span></div></div>
-      <div class="kpi"><div class="lbl">Google / ano</div><div class="val orange">R$ <span id="k-goog">—</span></div></div>
-    </div>
-
-    <div class="grid">
-      <div class="card full">
-        <h2>Planejamento de verba mensal <span class="tag">editável</span></h2>
-        <div class="hint">
-          Regra: <b>Total = Base + Evento do mês + Antecipação (30% do evento do mês seguinte)</b>, teto R$ 60k.
-          Comece na Base (R$ 20k) e digite o <b style="color:var(--orange-d)">Adicional de evento</b> de cada mês — o resto calcula sozinho. As edições ficam salvas neste navegador.
-        </div>
-        <div class="controls">
-          <div class="ctl"><label>Base (R$)</label><input id="c-base" type="number" value="20000" step="1000"></div>
-          <div class="ctl"><label>Teto (R$)</label><input id="c-teto" type="number" value="60000" step="1000"></div>
-          <div class="ctl"><label>Antecipação (%)</label><input id="c-ant" type="number" value="30" step="5"></div>
-          <div class="ctl"><label>Split Meta (%)</label><input id="c-split" type="number" value="67" step="1"></div>
-          <button class="btn" id="c-save">💾 Salvar</button>
-          <button class="btn ghost" id="c-reset">↺ Zerar eventos</button>
-        </div>
-        <table class="plan-table" style="margin-top:14px">
-          <thead><tr>
-            <th>Mês</th><th>Base</th><th>+ Evento</th><th>+ Antecip.</th><th>= Total</th><th>Meta</th><th>Google</th>
-          </tr></thead>
-          <tbody id="planbody"></tbody>
-          <tfoot><tr>
-            <td>TOTAL ANO</td><td id="f-base"></td><td id="f-ev"></td><td id="f-ant"></td>
-            <td id="f-tot"></td><td id="f-meta"></td><td id="f-goog"></td>
-          </tr></tfoot>
-        </table>
-      </div>
-    </div>
-
-    <div class="grid cols">
-      <div class="card full"><h2>Verba por mês</h2><div class="hint">Total mensal (barras) e split Meta/Google</div>
-        <div class="chart-box"><canvas id="planChart"></canvas></div></div>
-    </div>
-
-    <div class="note">
-      💡 <b>Guia de eventos (regra do cliente):</b> Feriado prolongado solto → +R$5k a 10k · Férias parciais / Eventos Locais (Dez, Jan, Páscoa) → +R$20k a 30k · Pico Absoluto (Julho) → +R$40k (bate no teto). Abril (Osterfest/Páscoa): lance só a parte proporcional aos dias do evento.
-    </div>
-  </div>
-
-  <!-- ================= PLANEJAMENTO ================= -->
-  <div class="pane" id="plano">
-    <div class="grid"><div class="card full">
-      <h2>Planejamento estratégico <span class="tag">plano de ação</span></h2>
-      <div class="hint">Aquisição multicanal para venda de ingressos: <b>captura de demanda</b> (quem já busca o parque) + <b>geração de demanda</b> (novos públicos). Alocação sobre a verba base — ajuste ao lado que o plano recalcula.</div>
-      <div class="controls">
-        <div class="ctl"><label>Verba mensal (R$)</label><input id="pl-verba" type="number" value="20000" step="1000"></div>
-        <div class="ctl"><label>Meta (%)</label><input id="pl-split" type="number" value="68" step="1"></div>
-        <div class="ctl"><label>Google (%)</label><input id="pl-goog" type="text" value="32" readonly style="opacity:.6;border-style:dashed"></div>
-      </div>
-    </div></div>
-
-    <div class="grid cols">
-      <div class="card">
-        <h2><span class="sw" style="background:#1b5540"></span>&nbsp;Meta Ads — <span id="pl-metaTot"></span></h2>
-        <div class="hint">Geração de demanda + remarketing (motor de faturamento)</div>
-        <table><thead><tr><th>Frente</th><th>Verba</th><th>Papel</th></tr></thead><tbody id="pl-meta"></tbody></table>
-      </div>
-      <div class="card">
-        <h2><span class="sw" style="background:#F07A1F"></span>&nbsp;Google Ads (Search) — <span id="pl-googTot"></span></h2>
-        <div class="hint">Captura de intenção de busca</div>
-        <table><thead><tr><th>Campanha</th><th>Verba</th><th>Foco</th></tr></thead><tbody id="pl-goog-b"></tbody></table>
-      </div>
-    </div>
-
-    <div class="grid cols">
-      <div class="card">
-        <h2>🎯 Metas de performance <span class="tag">90 dias</span></h2>
-        <div class="hint">Alvos para o período inicial</div>
-        <table><tbody>
-          <tr><td class="name">ROAS Meta</td><td style="text-align:right"><span class="badge b-good">≥ 5,0x</span></td></tr>
-          <tr><td class="name">CPA Google · Marca</td><td style="text-align:right"><span class="badge b-good">≤ R$ 15</span></td></tr>
-          <tr><td class="name">CPA Google · Nicho</td><td style="text-align:right"><span class="badge b-mid">≤ R$ 25</span></td></tr>
-          <tr><td class="name">Ticket médio</td><td style="text-align:right">~ R$ 175</td></tr>
-          <tr><td class="name">Remarketing</td><td style="text-align:right">100% dos abandonos</td></tr>
-        </tbody></table>
-      </div>
-      <div class="card">
-        <h2>🗺️ Fases de execução</h2>
-        <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">
-          <div><b style="color:var(--green)">Fase 1 · Sem. 1–2 — Fundação</b><div style="font-size:12px;color:var(--muted)">Rastreamento (pixel + CAPI), estrutura de campanhas, públicos e criativos no ar. Aquecimento.</div></div>
-          <div><b style="color:var(--green)">Fase 2 · Sem. 3–6 — Validação</b><div style="font-size:12px;color:var(--muted)">Teste de criativos e públicos, leitura de CPA/ROAS, corte do que não performa.</div></div>
-          <div><b style="color:var(--green)">Fase 3 · Contínuo — Escala</b><div style="font-size:12px;color:var(--muted)">Escalar os vencedores, remarketing sempre ativo, pacing por sazonalidade (picos de férias/feriados).</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="note">📌 Estratégia orientada por dados de demanda, concorrência e sazonalidade da região. Verba e split ajustáveis acima — o plano recalcula automaticamente.</div>
-  </div>
-
-  <footer>Cardô Marketing · Dashboard Spitz Pomer · Performance · Planejamento · Plano de Verba</footer>
+  <footer>Cardô Marketing · Dashboard Spitz Pomer · Centro de Comando & Performance</footer>
 </div>
 
 <script>/* histrico 2025 (estatico) + carregador AO VIVO (le a planilha direto do navegador). Cache-bust por timestamp. */
@@ -482,102 +504,6 @@ function analise(){
 anDe.onchange=analise; anAte.onchange=analise;
 document.getElementById('an-tudo').onclick=()=>{anDe.value=anMin;anAte.value=anMax;analise();};
 analise();
-
-/* ============ PLANO DE VERBA (editável) ============ */
-const LS='spitz_plano_v1';
-let eventos = JSON.parse(localStorage.getItem(LS) || 'null') || Array(12).fill(0);
-let planChart;
-
-function calc(){
-  const base=+document.getElementById('c-base').value||0;
-  const teto=+document.getElementById('c-teto').value||999999;
-  const ant=(+document.getElementById('c-ant').value||0)/100;
-  const split=(+document.getElementById('c-split').value||0)/100;
-  const rows=[]; let T={base:0,ev:0,ant:0,tot:0,meta:0,goog:0};
-  for(let i=0;i<12;i++){
-    const ev=+eventos[i]||0;
-    const antec=ant*(+eventos[(i+1)%12]||0);
-    const tot=Math.min(teto, base+ev+antec);
-    const meta=tot*split, goog=tot*(1-split);
-    rows.push({m:meses[i],base,ev,antec,tot,meta,goog,capped:base+ev+antec>teto});
-    T.base+=base;T.ev+=ev;T.ant+=antec;T.tot+=tot;T.meta+=meta;T.goog+=goog;
-  }
-  return {rows,T};
-}
-// Monta as linhas UMA vez (com os inputs); os inputs nao sao recriados depois
-function buildRows(){
-  document.getElementById('planbody').innerHTML=meses.map((m,i)=>`
-    <tr data-row="${i}">
-      <td class="name">${m}</td>
-      <td class="c-base"></td>
-      <td><input class="evinput" type="number" step="1000" data-i="${i}" value="${eventos[i]||0}"></td>
-      <td class="c-antec"></td>
-      <td class="c-tot"></td>
-      <td class="c-meta"></td>
-      <td class="c-goog"></td>
-    </tr>`).join('');
-  document.querySelectorAll('.evinput').forEach(inp=>inp.oninput=e=>{
-    eventos[+e.target.dataset.i]=+e.target.value||0;
-    localStorage.setItem(LS,JSON.stringify(eventos)); update();
-  });
-}
-// Atualiza SO os valores calculados (nao toca nos inputs -> mantem o foco)
-function update(){
-  const {rows,T}=calc();
-  document.querySelectorAll('#planbody tr').forEach(tr=>{
-    const r=rows[+tr.dataset.row];
-    tr.classList.toggle('cap',r.capped);
-    tr.querySelector('.c-base').textContent=BRL(r.base);
-    tr.querySelector('.c-antec').textContent=BRL(r.antec);
-    tr.querySelector('.c-tot').innerHTML=`<b>${BRL(r.tot)}</b>${r.capped?' <span class="pill">teto</span>':''}`;
-    tr.querySelector('.c-meta').textContent=BRL(r.meta);
-    tr.querySelector('.c-goog').textContent=BRL(r.goog);
-  });
-  f_base.textContent=BRL(T.base); f_ev.textContent=BRL(T.ev); f_ant.textContent=BRL(T.ant);
-  f_tot.textContent=BRL(T.tot); f_meta.textContent=BRL(T.meta); f_goog.textContent=BRL(T.goog);
-  document.getElementById('k-ano').textContent=kBRL(T.tot);
-  document.getElementById('k-meta').textContent=kBRL(T.meta).replace('R$ ','');
-  document.getElementById('k-goog').textContent=kBRL(T.goog).replace('R$ ','');
-  const data={labels:meses,datasets:[
-    {label:'Meta',data:rows.map(r=>r.meta),backgroundColor:'#1b5540',stack:'s',borderRadius:4},
-    {label:'Google',data:rows.map(r=>r.goog),backgroundColor:'#F07A1F',stack:'s',borderRadius:4}]};
-  if(planChart){planChart.data=data;planChart.update();}
-  else planChart=new Chart(document.getElementById('planChart'),{type:'bar',data,options:{maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>'R$ '+(v/1000)+'k'},grid:{color:'#eef2f0'}}}}});
-}
-const f_base=document.getElementById('f-base'),f_ev=document.getElementById('f-ev'),f_ant=document.getElementById('f-ant'),f_tot=document.getElementById('f-tot'),f_meta=document.getElementById('f-meta'),f_goog=document.getElementById('f-goog');
-const LScfg='spitz_plano_cfg_v1';
-function saveCfg(){localStorage.setItem(LScfg,JSON.stringify({base:document.getElementById('c-base').value,teto:document.getElementById('c-teto').value,ant:document.getElementById('c-ant').value,split:document.getElementById('c-split').value}));}
-(function loadCfg(){const c=JSON.parse(localStorage.getItem(LScfg)||'null');if(!c)return;['base','teto','ant','split'].forEach(k=>{if(c[k]!=null&&c[k]!=='')document.getElementById('c-'+k).value=c[k];});})();
-['c-base','c-teto','c-ant','c-split'].forEach(id=>document.getElementById(id).oninput=()=>{saveCfg();update();});
-document.getElementById('c-save').onclick=()=>{localStorage.setItem(LS,JSON.stringify(eventos));saveCfg();const b=document.getElementById('c-save');b.textContent='✓ Salvo!';b.style.background='#1a7a4c';setTimeout(()=>{b.textContent='💾 Salvar';b.style.background='';},1600);};
-document.getElementById('c-reset').onclick=()=>{eventos=Array(12).fill(0);localStorage.setItem(LS,JSON.stringify(eventos));buildRows();update();};
-buildRows(); update();
-
-/* ============ PLANEJAMENTO ============ */
-const metaFrentes=[
-  {n:'Aquisição (prospecção)',pct:72,desc:'Famílias da região + interesses lazer/família + lookalike de compradores'},
-  {n:'Remarketing',pct:28,desc:'Visitou / carrinho / checkout sem comprar'},
-];
-const googFrentes=[
-  {n:'Termos da Marca',pct:62,desc:'Proteção de marca + alta intenção'},
-  {n:'Termos do Nicho',pct:27,desc:'"o que fazer em Pomerode / Vale Europeu"'},
-  {n:'Concorrentes',pct:6,desc:'Pressão sobre a concorrência'},
-  {n:'Local / Pomerode',pct:5,desc:'Buscas e conteúdo local'},
-];
-function planejar(){
-  const verba=+document.getElementById('pl-verba').value||0;
-  let sm=+document.getElementById('pl-split').value; sm=isNaN(sm)?68:Math.max(0,Math.min(100,sm));
-  document.getElementById('pl-goog').value=(100-sm);
-  const metaV=verba*sm/100, googV=verba*(100-sm)/100;
-  document.getElementById('pl-metaTot').textContent=BRL(metaV);
-  document.getElementById('pl-googTot').textContent=BRL(googV);
-  const row=(f,tot)=>`<tr><td class="name">${f.n}</td><td style="text-align:right"><b>${BRL(tot*f.pct/100)}</b><br><span style="font-size:11px;color:var(--muted)">${f.pct}%</span></td><td style="font-size:12px;color:var(--muted)">${f.desc}</td></tr>`;
-  document.getElementById('pl-meta').innerHTML=metaFrentes.map(f=>row(f,metaV)).join('');
-  document.getElementById('pl-goog-b').innerHTML=googFrentes.map(f=>row(f,googV)).join('');
-}
-document.getElementById('pl-verba').oninput=planejar;
-document.getElementById('pl-split').oninput=planejar;
-planejar();
 
 /* ============ DASHBOARD META (ao vivo · filtro por data) ============ */
 let relC;
@@ -731,12 +657,18 @@ function renderTabelas(de,ate){
     ['Interações',o=>`<td>${fmtN(o.inter)}</td>`,o=>o.inter],
     ['Visitas',o=>`<td>${fmtN(o.vp)}</td>`,o=>o.vp]
   ];
-  function render(arr,thId,tbId,sumId,tagId){
+  function render(arr,thId,tbId,kpisId,bwId,tagId){
     const objs=toObjs(arr);
     const T=objs.reduce((a,o)=>{a.inv+=o.inv;a.imp+=o.imp;a.alc+=o.alc;a.v3+=o.v3;a.vimp+=o.vid?o.imp:0;return a;},{inv:0,imp:0,alc:0,v3:0,vimp:0});
     const hookMed=T.vimp?T.v3/T.vimp*100:0, cpm=T.imp?T.inv/T.imp*1000:0, freq=T.alc?T.imp/T.alc:0;
     document.getElementById(tagId).textContent=objs.length+' criativos';
-    document.getElementById(sumId).innerHTML=`Investimento <b>${BRL(T.inv)}</b> · Impressões <b>${fmtN(T.imp)}</b> · Alcance <b>${fmtN(T.alc)}</b> · CPM <b>${BRL2(cpm)}</b> · Frequência <b>${freq.toFixed(2).replace('.',',')}</b> · Hook médio (vídeo) <b>${hookMed.toFixed(0)}%</b>`;
+    const kpi=(l,v)=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div></div>`;
+    document.getElementById(kpisId).innerHTML=kpi('Investido',BRL(T.inv))+kpi('Impressões',fmtN(T.imp))+kpi('Alcance',fmtN(T.alc))+kpi('CPM',BRL2(cpm))+kpi('Frequência',freq.toFixed(2).replace('.',','))+kpi('Hook médio',hookMed.toFixed(0)+'%');
+    const vids=objs.filter(o=>o.vid&&o.hook!=null);
+    const lk=o=>BRAND_URL[o.nm]?`<a href="${BRAND_URL[o.nm]}" target="_blank" rel="noopener" style="color:var(--orange-d)">${o.nm.slice(0,32)} ↗</a>`:o.nm.slice(0,32);
+    if(vids.length){const best=vids.reduce((a,b)=>b.hook>a.hook?b:a),worst=vids.reduce((a,b)=>b.hook<a.hook?b:a);
+      document.getElementById(bwId).innerHTML=`<div class="bw"><div class="t">🏆 Melhor hook</div><span class="nm">${lk(best)}</span> <span class="badge b-good">${best.hook.toFixed(0)}%</span></div><div class="bw"><div class="t">⚠️ Revisar — pior hook</div><span class="nm">${lk(worst)}</span> <span class="badge b-bad">${worst.hook.toFixed(0)}%</span></div>`;
+    } else document.getElementById(bwId).innerHTML='';
     tabela(thId,tbId,objs,cB,{i:1,dir:-1});
   }
   // agrega o diario por criativo no intervalo [de,ate] (datas ISO aaaa-mm-dd)
@@ -751,8 +683,8 @@ function renderTabelas(de,ate){
   [mkDe,mkAte].forEach(i=>{i.min=bMin;i.max=bMax;}); mkDe.value=bMin; mkAte.value=bMax;
   function renderMarca(){
     const de=mkDe.value||bMin, ate=mkAte.value||bMax;
-    render(bAgg(BRANDALC,de,ate),'th-alc','tb-alc','alc-sum','alc-tag');
-    render(bAgg(BRANDREC,de,ate),'th-rec','tb-rec','rec-sum','rec-tag');
+    render(bAgg(BRANDALC,de,ate),'th-alc','tb-alc','alc-kpis','alc-bw','alc-tag');
+    render(bAgg(BRANDREC,de,ate),'th-rec','tb-rec','rec-kpis','rec-bw','rec-tag');
   }
   mkDe.onchange=renderMarca; mkAte.onchange=renderMarca;
   document.getElementById('mk-tudo').onclick=()=>{mkDe.value=bMin;mkAte.value=bMax;renderMarca();};
@@ -815,7 +747,115 @@ function googleTab(){
 gDe.onchange=googleTab; gAte.onchange=googleTab;
 document.getElementById('g-tudo').onclick=()=>{gDe.value=gMin;gAte.value=gMax;googleTab();};
 
+/* ============ CENTRO DE COMANDO (aba inicial) ============ */
+const CMD={verbaMes:20000, lat:-26.74, lon:-49.18};
+const MESL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const WMO={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
+const wIco=c=>WMO[c]||'🌡️';
+const advis=(mm,prob)=> (mm>=5||prob>=70)?['bad','🔴 Segure o pé']:(mm>=1||prob>=50)?['mid','🟡 Atenção']:['ok','🟢 Bom dia'];
+const semaf=(v,alvo)=>v<=alvo?'b-good':v<=alvo*1.5?'b-mid':'b-bad';
+let _magg={},_gagg={},_ragg=[],_cpaBlend=0,_vdMes=0,_diasCD=1,_diasNM=30;
+
+function fillSlider(el){ if(!el)return; const p=(el.value-el.min)/(el.max-el.min)*100; el.style.background=`linear-gradient(90deg,var(--orange) ${p}%,#E6DCC0 ${p}%)`; }
+
+function pintarMetas(){
+  const cM=+document.getElementById('sl-cpaMeta').value, cG=+document.getElementById('sl-cpaGoogle').value;
+  document.getElementById('lbl-cpaMeta').textContent='R$ '+cM;
+  document.getElementById('lbl-cpaGoogle').textContent='R$ '+cG;
+  document.getElementById('tag-cpaMeta').innerHTML='&lt; R$'+cM;
+  document.getElementById('tag-cpaGoogle').innerHTML='&lt; R$'+cG;
+  fillSlider(document.getElementById('sl-cpaMeta')); fillSlider(document.getElementById('sl-cpaGoogle'));
+  const kb=document.getElementById('kpi-cpa-badge'); if(kb){kb.className='badge '+semaf(_cpaBlend,cM);kb.innerHTML='alvo &lt; R$'+cM;}
+  const acao=(c,v,alvo)=> v<3?['a-man','Pouco dado']:c<=alvo?['a-esc','Escalar']:c<=alvo*1.5?['a-man','Manter']:['a-cut','Cortar'];
+  const linhas=(agg,alvo,isG)=>Object.entries(agg).filter(([k,a])=>isG?a.vd>0:(/Vendas/i.test(k)&&a.inv>10)).sort((x,y)=>y[1].inv-x[1].inv).map(([k,a])=>{const c=a.vd?a.inv/a.vd:0,ac=acao(c,a.vd,alvo);const nm=k.replace(/^SP_(FB\d+_)?/,'').replace(/^\[SP\] ?/,'').replace(/_/g,' ').slice(0,24);return `<tr><td class="name">${nm}</td><td>${BRL(a.inv)}</td><td>${Math.round(a.vd)}</td><td><span class="badge ${semaf(c,alvo)}">${a.vd?BRL2(c):'—'}</span></td><td><span class="acao ${ac[0]}">${ac[1]}</span></td></tr>`;}).join('');
+  document.getElementById('cmd-meta').innerHTML=linhas(_magg,cM,false)||'<tr><td colspan=5>—</td></tr>';
+  document.getElementById('cmd-goog').innerHTML=linhas(_gagg,cG,true)||'<tr><td colspan=5>—</td></tr>';
+  const mvals=Object.entries(_magg).filter(([k,a])=>/Vendas/i.test(k)&&a.inv>10&&a.vd>0).map(([k,a])=>a.inv/a.vd);
+  const gvals=Object.entries(_gagg).filter(([k,a])=>a.vd>0).map(([k,a])=>a.inv/a.vd);
+  const cnt=(arr,alvo)=>[arr.filter(c=>c<=alvo).length, arr.filter(c=>c>alvo*1.5).length];
+  const mC=cnt(mvals,cM), gC=cnt(gvals,cG);
+  document.getElementById('res-cpaMeta').innerHTML=`<span class="ok">✅ ${mC[0]} na meta</span><span class="sep">·</span><span class="bad">✂️ ${mC[1]} a cortar</span>`;
+  document.getElementById('res-cpaGoogle').innerHTML=`<span class="ok">✅ ${gC[0]} na meta</span><span class="sep">·</span><span class="bad">✂️ ${gC[1]} a cortar</span>`;
+}
+
+function metaMes(){
+  const meta=+document.getElementById('sl-metaVd').value;
+  document.getElementById('lbl-metaVd').textContent=meta+' vendas';
+  fillSlider(document.getElementById('sl-metaVd'));
+  const ating=meta?Math.min(100,_vdMes/meta*100):0;
+  const projVd=_diasCD?Math.round(_vdMes/_diasCD*_diasNM):0;
+  const projPct=meta?Math.min(100,projVd/meta*100):0;
+  const bate=projVd>=meta;
+  document.getElementById('meta-mes-tag').textContent=Math.round(_vdMes/meta*100)+'% da meta';
+  document.getElementById('meta-mes').innerHTML=`
+   <div class="pbar" style="margin-top:4px"><div class="pf" style="width:${ating}%"></div><div class="pp" style="left:${projPct}%" title="projeção"></div></div>
+   <div class="pgrid" style="grid-template-columns:repeat(3,1fr)">
+     <div class="b"><div class="n">${_vdMes.toLocaleString('pt-BR')}</div><div class="t">vendas até agora</div></div>
+     <div class="b"><div class="n">${meta.toLocaleString('pt-BR')}</div><div class="t">meta do mês</div></div>
+     <div class="b"><div class="n">${projVd.toLocaleString('pt-BR')} <span class="badge ${bate?'b-good':'b-bad'}">${bate?'bate':'não bate'}</span></div><div class="t">projeção no ritmo</div></div>
+   </div>
+   <div class="mres" style="margin-top:12px">${bate?`<span class="ok">✅ No ritmo você fecha ${projVd.toLocaleString('pt-BR')} vendas — acima da meta</span>`:`<span class="bad">⚠️ No ritmo fecha ${projVd.toLocaleString('pt-BR')} — faltam ${(meta-projVd).toLocaleString('pt-BR')} pra meta</span>`}</div>`;
+  document.getElementById('res-metaVd').innerHTML=`<span class="${bate?'ok':'bad'}">${Math.round(_vdMes/meta*100)}% atingido</span><span class="sep">·</span>projeção ${projVd.toLocaleString('pt-BR')}`;
+}
+
+function renderPlacar(Ti,Tv,Tf,Gi,Gv,Gf){
+  const box=(nome,inv,vd,fat,cor)=>{const cpa=vd?inv/vd:0,roas=inv?fat/inv:0;return `<div style="flex:1;background:#F7F2E4;border-radius:12px;padding:16px;text-align:center;border-top:4px solid ${cor}"><div style="font-weight:800;color:var(--green);margin-bottom:8px">${nome}</div><div style="font-size:22px;font-weight:800;color:var(--green)">${vd?BRL2(cpa):'—'}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">CPA · ${Math.round(vd)} vendas</div><div style="margin-top:8px;font-size:12px;color:var(--muted)">Invest. <b style="color:var(--ink)">${BRL(inv)}</b> · ROAS <b style="color:var(--ink)">${roas.toFixed(1)}x</b></div></div>`;};
+  const mCpa=Tv?Ti/Tv:1e9,gCpa=Gv?Gi/Gv:1e9;
+  const vencedor=gCpa<mCpa?'🔍 Google vende mais barato':'📱 Meta vende mais barato';
+  document.getElementById('placar').innerHTML=`<div style="display:flex;gap:12px">${box('📱 Meta',Ti,Tv,Tf,'#1b5540')}${box('🔍 Google',Gi,Gv,Gf,'#F07A1F')}</div><div class="mres" style="margin-top:12px"><span class="ok">🏆 ${vencedor}</span></div>`;
+}
+
+function comando(){
+  const mesDe=r=>+((r[0]||'').split('/')[1]||0), diaDe=r=>+((r[0]||'').split('/')[0]||0);
+  const ult=Math.max(...CAMPD.map(mesDe)), noMes=r=>mesDe(r)===ult;
+  const diasComDado=Math.max(...CAMPD.filter(noMes).map(diaDe));
+  const pe=document.querySelector('.period'); if(pe) pe.textContent=`🟢 Campanha ativa · ${MESL[ult-1]} 2026`;
+  const magg={},gagg={}; let Ti=0,Tv=0,Tf=0,Gi=0,Gv=0,Gf=0;
+  CAMPD.filter(noMes).forEach(r=>{const k=r[1];const a=magg[k]||(magg[k]={inv:0,vd:0,fat:0});a.inv+=r[2];a.vd+=r[7];a.fat+=r[8];Ti+=r[2];Tv+=r[7];Tf+=r[8];});
+  GCAMPD.filter(noMes).forEach(r=>{const k=r[1];const a=gagg[k]||(gagg[k]={inv:0,vd:0,fat:0});a.inv+=r[2];a.vd+=r[5];a.fat+=r[6];Gi+=r[2];Gv+=r[5];Gf+=r[6];});
+  _magg=magg;_gagg=gagg;
+  const inv=Ti+Gi, vd=Tv+Gv, fat=Tf+Gf;
+  const cpa=vd?inv/vd:0, roas=inv?fat/inv:0, ticket=vd?fat/vd:0; _cpaBlend=cpa;
+  document.getElementById('cmd-kpis').innerHTML=`
+   <div class="kpi"><div class="lbl">Faturamento</div><div class="val">${BRL(fat)}</div><div class="mini" style="color:var(--muted)">ROAS ${roas.toFixed(1)}x</div></div>
+   <div class="kpi"><div class="lbl">Vendas</div><div class="val">${Math.round(vd).toLocaleString('pt-BR')}</div><div class="mini" style="color:var(--muted)">Meta + Google</div></div>
+   <div class="kpi"><div class="lbl">CPA blended</div><div class="val">${BRL2(cpa)}</div><div class="mini"><span id="kpi-cpa-badge" class="badge ${semaf(cpa,30)}">alvo &lt; R$30</span></div></div>
+   <div class="kpi"><div class="lbl">Investido</div><div class="val">${BRL(inv)}</div><div class="mini" style="color:var(--muted)">Meta ${inv?Math.round(Ti/inv*100):0}% · GG ${inv?Math.round(Gi/inv*100):0}%</div></div>
+   <div class="kpi"><div class="lbl">Ticket médio</div><div class="val">${BRL2(ticket)}</div></div>
+   <div class="kpi"><div class="lbl">ROAS real</div><div class="val orange">${(roas/1.13).toFixed(1)}x</div><div class="mini" style="color:var(--muted)">c/ imposto 13%</div></div>`;
+  const diasNoMes=new Date(2026,ult,0).getDate(), restam=diasNoMes-diasComDado;
+  _vdMes=Math.round(vd); _diasCD=diasComDado; _diasNM=diasNoMes;
+  const ritmo=diasComDado?inv/diasComDado:0, plano=CMD.verbaMes/diasNoMes;
+  const proj=inv+plano*restam, projRitmo=ritmo*diasNoMes;   // projeção seguindo o plano vs se mantiver o ritmo
+  const pf=Math.min(100,inv/CMD.verbaMes*100), pp=Math.min(100,proj/CMD.verbaMes*100);
+  const projCls=proj<=CMD.verbaMes?'b-good':proj<=CMD.verbaMes*1.1?'b-mid':'b-bad';
+  const ritmoCls=ritmo<=plano?'b-good':ritmo<=plano*1.15?'b-mid':'b-bad';
+  document.getElementById('cmd-pacing').innerHTML=`
+   <div class="pbar"><div class="pf" style="width:${pf}%"></div><div class="pp" style="left:${pp}%" title="projeção"></div></div>
+   <div class="hint">Barra = gasto atual · marca laranja = projeção fim do mês seguindo o plano</div>
+   <div class="pgrid">
+     <div class="b"><div class="n">${BRL(inv)}</div><div class="t">de ${BRL(CMD.verbaMes)} gastos</div></div>
+     <div class="b"><div class="n">${BRL(Math.max(0,CMD.verbaMes-inv))}</div><div class="t">disponível · ${restam} dias restam</div></div>
+     <div class="b"><div class="n">${BRL(ritmo)} <span class="badge ${ritmoCls}">/dia</span></div><div class="t">ritmo atual · plano ${BRL(plano)}/dia</div></div>
+     <div class="b"><div class="n">${BRL(proj)} <span class="badge ${projCls}">${proj<=CMD.verbaMes?'no teto':'acima'}</span></div><div class="t">projeção seguindo o plano · no ritmo de hoje: ${BRL(projRitmo)}</div></div>
+   </div>`;
+  document.getElementById('sl-cpaMeta').oninput=pintarMetas;
+  document.getElementById('sl-cpaGoogle').oninput=pintarMetas;
+  document.getElementById('sl-metaVd').oninput=metaMes;
+  renderPlacar(Ti,Tv,Tf,Gi,Gv,Gf);
+  pintarMetas();
+  metaMes();
+  const wu=`https://api.open-meteo.com/v1/forecast?latitude=${CMD.lat}&longitude=${CMD.lon}&daily=weathercode,precipitation_sum,precipitation_probability_max,temperature_2m_max,temperature_2m_min&current=temperature_2m,weathercode&timezone=America/Sao_Paulo&forecast_days=7`;
+  fetch(wu).then(r=>r.json()).then(w=>{
+    const c=w.current,d=w.daily, a0=advis(d.precipitation_sum[0],d.precipitation_probability_max[0]);
+    document.getElementById('cmd-wnow').innerHTML=`<div class="wnow"><div class="we">${wIco(c.weathercode)}</div><div><div class="wt">${Math.round(c.temperature_2m)}°C</div><div style="opacity:.8;font-size:13px">Pomerode/SC agora</div></div><div class="wadv"><div class="big">${a0[1]}</div></div></div>`;
+    const dn=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    document.getElementById('cmd-wdays').innerHTML=d.time.map((t,i)=>{const dt=new Date(t+'T12:00:00'),a=advis(d.precipitation_sum[i],d.precipitation_probability_max[i]),bcl=a[0]==='ok'?'b-good':a[0]==='mid'?'b-mid':'b-bad';return `<div class="wday w-${a[0]}"><div class="wdn">${i===0?'Hoje':dn[dt.getDay()]} ${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}</div><div class="wde">${wIco(d.weathercode[i])}</div><div class="wdt">${Math.round(d.temperature_2m_min[i])}–${Math.round(d.temperature_2m_max[i])}°</div><div class="wdc">💧 ${d.precipitation_sum[i].toFixed(0)}mm · ${d.precipitation_probability_max[i]}%</div><span class="wds badge ${bcl}">${a[1].replace(/^.. /,'')}</span></div>`;}).join('');
+  }).catch(()=>{document.getElementById('cmd-wdays').innerHTML='<div class="hint">Clima indisponível no momento.</div>';});
+}
+
 // dispara o render inicial (agora que renderTabelas e as tabelas estao definidas)
+comando();
 relatorio();
 googleTab();
 })(); // fim do wrapper async (dados ao vivo)
