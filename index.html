@@ -173,7 +173,7 @@
 
     <div class="grid"><div class="card full">
       <h2>🎚️ Metas — arraste para calibrar <span class="tag">ao vivo</span></h2>
-      <div class="hint">Defina o <b>CPA máximo que você aceita pagar por venda</b>. Embaixo de cada slider aparece <b>quantas campanhas batem a meta</b> (manter/escalar) e <b>quantas estão caras demais</b> (a cortar). Arraste e os números mudam na hora.</div>
+      <div class="hint">Defina o <b>CPA máximo que você aceita pagar por venda</b>. Embaixo de cada slider aparece <b>quantas campanhas estão com CPA OK</b> e <b>quantas com CPA FORA</b> (acima do limite). Arraste e os números mudam na hora.</div>
       <div class="metas-ctl">
         <div class="mslider">
           <label>CPA Vendas · Meta <b id="lbl-cpaMeta">R$ 30</b></label>
@@ -210,9 +210,9 @@
 
     <div class="grid cols">
       <div class="card"><h2>🎯 CPA Meta — Vendas <span class="tag" id="tag-cpaMeta">&lt; R$30</span></h2>
-        <table><thead><tr><th>Campanha</th><th>Inv</th><th>Vd</th><th>CPA</th><th>Ação</th></tr></thead><tbody id="cmd-meta"></tbody></table></div>
+        <table><thead><tr><th>Campanha</th><th>Inv</th><th>Vd</th><th>CPA</th><th>Status</th></tr></thead><tbody id="cmd-meta"></tbody></table></div>
       <div class="card"><h2>🎯 CPA Google <span class="tag" id="tag-cpaGoogle">&lt; R$8</span></h2>
-        <table><thead><tr><th>Campanha</th><th>Inv</th><th>Vd</th><th>CPA</th><th>Ação</th></tr></thead><tbody id="cmd-goog"></tbody></table></div>
+        <table><thead><tr><th>Campanha</th><th>Inv</th><th>Vd</th><th>CPA</th><th>Status</th></tr></thead><tbody id="cmd-goog"></tbody></table></div>
     </div>
 
     <div class="grid cols">
@@ -766,16 +766,15 @@ function pintarMetas(){
   document.getElementById('tag-cpaGoogle').innerHTML='&lt; R$'+cG;
   fillSlider(document.getElementById('sl-cpaMeta')); fillSlider(document.getElementById('sl-cpaGoogle'));
   const kb=document.getElementById('kpi-cpa-badge'); if(kb){kb.className='badge '+semaf(_cpaBlend,cM);kb.innerHTML='alvo &lt; R$'+cM;}
-  const acao=(c,v,alvo)=> v<3?['a-man','Pouco dado']:c<=alvo?['a-esc','Escalar']:c<=alvo*1.5?['a-man','Manter']:['a-cut','Cortar'];
-  const linhas=(agg,alvo,isG)=>Object.entries(agg).filter(([k,a])=>isG?a.vd>0:(/Vendas/i.test(k)&&a.inv>10)).sort((x,y)=>y[1].inv-x[1].inv).map(([k,a])=>{const c=a.vd?a.inv/a.vd:0,ac=acao(c,a.vd,alvo);const nm=k.replace(/^SP_(FB\d+_)?/,'').replace(/^\[SP\] ?/,'').replace(/_/g,' ').slice(0,24);return `<tr><td class="name">${nm}</td><td>${BRL(a.inv)}</td><td>${Math.round(a.vd)}</td><td><span class="badge ${semaf(c,alvo)}">${a.vd?BRL2(c):'—'}</span></td><td><span class="acao ${ac[0]}">${ac[1]}</span></td></tr>`;}).join('');
+  const stat=(c,v,alvo)=> v<3?['b-mid','pouca venda']:c<=alvo?['b-good','CPA OK']:c<=alvo*1.5?['b-mid','no limite']:['b-bad','CPA FORA'];
+  const linhas=(agg,alvo,isG)=>Object.entries(agg).filter(([k,a])=>isG?a.vd>0:(/Vendas/i.test(k)&&a.inv>10)).sort((x,y)=>y[1].inv-x[1].inv).map(([k,a])=>{const c=a.vd?a.inv/a.vd:0,st=stat(c,a.vd,alvo);const nm=k.replace(/^SP_(FB\d+_)?/,'').replace(/^\[SP\] ?/,'').replace(/_/g,' ').slice(0,24);return `<tr><td class="name">${nm}</td><td>${BRL(a.inv)}</td><td>${Math.round(a.vd)}</td><td><span class="badge ${semaf(c,alvo)}">${a.vd?BRL2(c):'—'}</span></td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>`;}).join('');
   document.getElementById('cmd-meta').innerHTML=linhas(_magg,cM,false)||'<tr><td colspan=5>—</td></tr>';
   document.getElementById('cmd-goog').innerHTML=linhas(_gagg,cG,true)||'<tr><td colspan=5>—</td></tr>';
   const mvals=Object.entries(_magg).filter(([k,a])=>/Vendas/i.test(k)&&a.inv>10&&a.vd>0).map(([k,a])=>a.inv/a.vd);
   const gvals=Object.entries(_gagg).filter(([k,a])=>a.vd>0).map(([k,a])=>a.inv/a.vd);
-  const cnt=(arr,alvo)=>[arr.filter(c=>c<=alvo).length, arr.filter(c=>c>alvo*1.5).length];
-  const mC=cnt(mvals,cM), gC=cnt(gvals,cG);
-  document.getElementById('res-cpaMeta').innerHTML=`<span class="ok">✅ ${mC[0]} na meta</span><span class="sep">·</span><span class="bad">✂️ ${mC[1]} a cortar</span>`;
-  document.getElementById('res-cpaGoogle').innerHTML=`<span class="ok">✅ ${gC[0]} na meta</span><span class="sep">·</span><span class="bad">✂️ ${gC[1]} a cortar</span>`;
+  const resumo=(arr,alvo)=>{const ok=arr.filter(c=>c<=alvo).length, fora=arr.filter(c=>c>alvo*1.5).length; return `<span class="ok">🟢 ${ok} CPA OK</span><span class="sep">·</span><span class="bad">🔴 ${fora} CPA FORA</span>`;};
+  document.getElementById('res-cpaMeta').innerHTML=resumo(mvals,cM);
+  document.getElementById('res-cpaGoogle').innerHTML=resumo(gvals,cG);
 }
 
 function metaMes(){
