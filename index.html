@@ -171,6 +171,12 @@
   <div class="pane active" id="cmd">
     <div class="grid kpis" id="cmd-kpis"></div>
 
+    <div class="grid"><div class="card full" style="border-top:3px solid var(--orange)">
+      <h2>🎯 Meta de Ecommerce <span class="tag" id="ecom-tag">mês</span></h2>
+      <div class="hint">Nossa frente é o <b>ecommerce</b> (venda online) — a única meta que o tráfego pago move direto. <b>Realizado</b> = faturamento atribuído aos anúncios (Meta + Google).</div>
+      <div id="meta-ecom"></div>
+    </div></div>
+
     <div class="grid"><div class="card full">
       <h2>🎚️ Metas — arraste para calibrar <span class="tag">ao vivo</span></h2>
       <div class="hint">Defina o <b>CPA máximo que você aceita pagar por venda</b>. Embaixo de cada slider aparece <b>quantas campanhas estão com CPA OK</b> e <b>quantas com CPA FORA</b> (acima do limite). Arraste e os números mudam na hora.</div>
@@ -748,7 +754,7 @@ gDe.onchange=googleTab; gAte.onchange=googleTab;
 document.getElementById('g-tudo').onclick=()=>{gDe.value=gMin;gAte.value=gMax;googleTab();};
 
 /* ============ CENTRO DE COMANDO (aba inicial) ============ */
-const CMD={verbaMes:20000, lat:-26.74, lon:-49.18};
+const CMD={verbaMes:20000, lat:-26.74, lon:-49.18, metaEcom:161200}; /* metaEcom = meta de faturamento do canal Ecommerce no mes (atualizar mensal) */
 const MESL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const WMO={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
 const wIco=c=>WMO[c]||'🌡️';
@@ -784,7 +790,7 @@ function metaMes(){
   const ating=meta?Math.min(100,_vdMes/meta*100):0;
   const projVd=_diasCD?Math.round(_vdMes/_diasCD*_diasNM):0;
   const projPct=meta?Math.min(100,projVd/meta*100):0;
-  const bate=projVd>=meta;
+  const bate=projVd>=meta, conf=_diasCD>=7;
   document.getElementById('meta-mes-tag').textContent=Math.round(_vdMes/meta*100)+'% da meta';
   document.getElementById('meta-mes').innerHTML=`
    <div class="pbar" style="margin-top:4px"><div class="pf" style="width:${ating}%"></div><div class="pp" style="left:${projPct}%" title="projeção"></div></div>
@@ -793,8 +799,8 @@ function metaMes(){
      <div class="b"><div class="n">${meta.toLocaleString('pt-BR')}</div><div class="t">meta do mês</div></div>
      <div class="b"><div class="n">${projVd.toLocaleString('pt-BR')} <span class="badge ${bate?'b-good':'b-bad'}">${bate?'bate':'não bate'}</span></div><div class="t">projeção no ritmo</div></div>
    </div>
-   <div class="mres" style="margin-top:12px">${bate?`<span class="ok">✅ No ritmo você fecha ${projVd.toLocaleString('pt-BR')} vendas — acima da meta</span>`:`<span class="bad">⚠️ No ritmo fecha ${projVd.toLocaleString('pt-BR')} — faltam ${(meta-projVd).toLocaleString('pt-BR')} pra meta</span>`}</div>`;
-  document.getElementById('res-metaVd').innerHTML=`<span class="${bate?'ok':'bad'}">${Math.round(_vdMes/meta*100)}% atingido</span><span class="sep">·</span>projeção ${projVd.toLocaleString('pt-BR')}`;
+   <div class="mres" style="margin-top:12px">${bate?`<span class="ok">✅ No ritmo você fecha ${projVd.toLocaleString('pt-BR')} vendas — acima da meta</span>`:`<span class="bad">⚠️ No ritmo fecha ${projVd.toLocaleString('pt-BR')} — faltam ${(meta-projVd).toLocaleString('pt-BR')} pra meta</span>`}${conf?'':'<span class="sep">·</span><span style="color:var(--muted);font-weight:600">estimativa (poucos dias)</span>'}</div>`;
+  document.getElementById('res-metaVd').innerHTML=`<span class="${bate?'ok':'bad'}">${Math.round(_vdMes/meta*100)}% atingido</span><span class="sep">·</span>no ritmo: ${projVd.toLocaleString('pt-BR')}`;
 }
 
 function renderPlacar(Ti,Tv,Tf,Gi,Gv,Gf){
@@ -822,6 +828,20 @@ function comando(){
    <div class="kpi"><div class="lbl">Investido</div><div class="val">${BRL(inv)}</div><div class="mini" style="color:var(--muted)">Meta ${inv?Math.round(Ti/inv*100):0}% · GG ${inv?Math.round(Gi/inv*100):0}%</div></div>
    <div class="kpi"><div class="lbl">Ticket médio</div><div class="val">${BRL2(ticket)}</div></div>
    <div class="kpi"><div class="lbl">ROAS real</div><div class="val orange">${(roas/1.13).toFixed(1)}x</div><div class="mini" style="color:var(--muted)">c/ imposto 13%</div></div>`;
+  // meta de ecommerce (faturamento do mes vs meta do canal)
+  const _dnm=new Date(2026,ult,0).getDate();
+  const _projE=diasComDado?fat/diasComDado*_dnm:0;
+  const _pctE=CMD.metaEcom?fat/CMD.metaEcom*100:0, _projPctE=CMD.metaEcom?_projE/CMD.metaEcom*100:0;
+  const _bateE=_projE>=CMD.metaEcom, _confE=diasComDado>=7;
+  document.getElementById('ecom-tag').textContent=`${MESL[ult-1]} · meta R$ ${CMD.metaEcom.toLocaleString('pt-BR')}`;
+  document.getElementById('meta-ecom').innerHTML=`
+   <div class="pbar" style="margin-top:6px;height:30px"><div class="pf" style="width:${Math.min(100,_pctE)}%"></div><div class="pp" style="left:${Math.min(100,_projPctE)}%" title="projeção fim do mês"></div></div>
+   <div class="pgrid" style="grid-template-columns:repeat(3,1fr)">
+     <div class="b"><div class="n">${BRL(fat)}</div><div class="t">realizado hoje · anúncios</div></div>
+     <div class="b"><div class="n">${BRL(CMD.metaEcom)}</div><div class="t">meta ecommerce</div></div>
+     <div class="b"><div class="n">${_pctE.toFixed(0)}%</div><div class="t">da meta até agora</div></div>
+   </div>
+   <div class="mres" style="margin-top:12px">${_bateE?`<span class="ok">✅ No ritmo do mês, fecha em ${BRL(_projE)} — bate a meta</span>`:`<span class="bad">⚠️ No ritmo fecha em ${BRL(_projE)} — faltam ${BRL(CMD.metaEcom-_projE)}</span>`}${_confE?'':'<span class="sep">·</span><span style="color:var(--muted);font-weight:600">estimativa (poucos dias)</span>'}</div>`;
   const diasNoMes=new Date(2026,ult,0).getDate(), restam=diasNoMes-diasComDado;
   _vdMes=Math.round(vd); _diasCD=diasComDado; _diasNM=diasNoMes;
   const ritmo=diasComDado?inv/diasComDado:0, plano=CMD.verbaMes/diasNoMes;
