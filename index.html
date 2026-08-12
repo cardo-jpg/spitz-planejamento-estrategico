@@ -364,7 +364,7 @@
 
     <div class="grid"><div class="card full">
       <h2>Faturamento × meta diária <span class="tag">ROAS</span></h2>
-      <div class="hint">Barra = faturamento. Linhas tracejadas = meta de faturamento p/ ROAS 5x (verde) e 3x (vermelho), acompanhando o investimento do dia.</div>
+      <div class="hint">Barra = faturamento. Tracejadas = meta de faturamento p/ ROAS 5x (verde) e 3x (vermelho), acompanhando o investimento do dia. <b>Linha roxa = CPA (custo por venda)</b>, no eixo da direita — quanto mais baixa, melhor.</div>
       <div class="chart-box" style="height:300px"><canvas id="gChart"></canvas></div>
     </div></div>
 
@@ -736,18 +736,20 @@ function googleTab(){
   tabela('th-gkw','tb-gkw',googleAgg(GKWD,de,ate),gcKw,stGk);
   tabela('th-gloc','tb-gloc',googleAgg(GLOCD,de,ate),gcLoc,stGl);
   const byDay={};
-  rows.forEach(r=>{const a=byDay[r[0]]||(byDay[r[0]]=[0,0]); a[0]+=r[2]; a[1]+=r[6];});
+  rows.forEach(r=>{const a=byDay[r[0]]||(byDay[r[0]]=[0,0,0]); a[0]+=r[2]; a[1]+=r[6]; a[2]+=r[5];});
   const days=Object.keys(byDay).sort((a,b)=>{const pa=a.split('/'),pb=b.split('/');return (pa[1]-pb[1])||(pa[0]-pb[0]);});
   const gi=days.map(d=>byDay[d][0]);
+  const gCPA=days.map(d=>byDay[d][2]?+(byDay[d][0]/byDay[d][2]).toFixed(2):null); // custo por venda do dia
   const dC={labels:days,datasets:[
     {type:'bar',label:'Faturamento',data:days.map(d=>byDay[d][1]),backgroundColor:'#F07A1F',borderRadius:4,order:3},
     {type:'line',label:'Meta (ROAS 5x)',data:gi.map(v=>+(v*5).toFixed(2)),borderColor:'#1a7a4c',borderDash:[6,4],borderWidth:2,pointRadius:0,tension:.25,order:1},
     {type:'line',label:'Mínimo (ROAS 3x)',data:gi.map(v=>+(v*3).toFixed(2)),borderColor:'#c0392b',borderDash:[6,4],borderWidth:2,pointRadius:0,tension:.25,order:1},
-    {type:'line',label:'Investimento',data:gi,borderColor:'#1b5540',backgroundColor:'#1b5540',borderWidth:2,pointRadius:2,tension:.25,order:0}
+    {type:'line',label:'Investimento',data:gi,borderColor:'#1b5540',backgroundColor:'#1b5540',borderWidth:2,pointRadius:2,tension:.25,order:0},
+    {type:'line',label:'CPA (custo/venda)',data:gCPA,borderColor:'#6b4fbb',backgroundColor:'#6b4fbb',borderWidth:2.5,pointRadius:3,tension:.25,order:0,yAxisID:'y1',spanGaps:true}
   ]};
   const oC={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    plugins:{legend:{position:'top',labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+BRL(c.parsed.y)}}},
-    scales:{x:{grid:{display:false}},y:{position:'left',beginAtZero:true,ticks:{callback:v=>'R$ '+(v/1000).toLocaleString('pt-BR')+'k'},grid:{color:'#eef2f0'}}}};
+    plugins:{legend:{position:'top',labels:{boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.dataset.yAxisID==='y1'?BRL2(c.parsed.y):BRL(c.parsed.y))}}},
+    scales:{x:{grid:{display:false}},y:{position:'left',beginAtZero:true,ticks:{callback:v=>'R$ '+(v/1000).toLocaleString('pt-BR')+'k'},grid:{color:'#eef2f0'}},y1:{position:'right',beginAtZero:true,grid:{display:false},ticks:{callback:v=>'R$ '+v}}}};
   if(gChart){gChart.data=dC;gChart.options=oC;gChart.update();}else gChart=new Chart(document.getElementById('gChart'),{data:dC,options:oC});
 }
 gDe.onchange=googleTab; gAte.onchange=googleTab;
@@ -826,7 +828,7 @@ function comando(){
    <div class="kpi"><div class="lbl">Vendas</div><div class="val">${Math.round(vd).toLocaleString('pt-BR')}</div><div class="mini" style="color:var(--muted)">Meta + Google</div></div>
    <div class="kpi"><div class="lbl">CPA blended</div><div class="val">${BRL2(cpa)}</div><div class="mini"><span id="kpi-cpa-badge" class="badge ${semaf(cpa,30)}">alvo &lt; R$30</span></div></div>
    <div class="kpi"><div class="lbl">Investido</div><div class="val">${BRL(inv)}</div><div class="mini" style="color:var(--muted)">Meta ${inv?Math.round(Ti/inv*100):0}% · GG ${inv?Math.round(Gi/inv*100):0}%</div></div>
-   <div class="kpi"><div class="lbl">Ticket médio</div><div class="val">${BRL2(ticket)}</div></div>
+   <div class="kpi"><div class="lbl">Ticket médio</div><div class="val">${BRL2(ticket)}</div><div class="mini" style="color:var(--muted)">por venda</div></div>
    <div class="kpi"><div class="lbl">ROAS real</div><div class="val orange">${(roas/1.13).toFixed(1)}x</div><div class="mini" style="color:var(--muted)">c/ imposto 13%</div></div>`;
   // meta de ecommerce (faturamento do mes vs meta do canal)
   const _dnm=new Date(2026,ult,0).getDate();
