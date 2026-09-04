@@ -118,6 +118,21 @@
   .wday .wde{font-size:1.7rem;margin:5px 0 2px}.wday .wdt{font-size:13px;font-weight:700;color:var(--green)}
   .wday .wdc{font-size:11px;color:var(--muted);margin-top:2px}
   .wday .wds{font-size:10px;margin-top:5px;display:inline-block}
+  .wday .wgasto{font-size:11px;font-weight:800;color:var(--green);margin-top:6px;padding-top:5px;border-top:1px dashed var(--ring)}
+  .valegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:820px){.valegrid{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.valegrid{grid-template-columns:1fr}}
+  .vcard{border:1px solid var(--ring);border-radius:12px;padding:14px 16px;background:#fff;border-left:5px solid var(--ring)}
+  .vcard.v-ok{border-left-color:#1a7a4c}.vcard.v-watch{border-left-color:#b45f0a}.vcard.v-alert{border-left-color:#c0392b}
+  .vcard .vtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .vcard .vnm{font-weight:800;color:var(--green);font-size:15px}
+  .vcard .vmet{margin-top:9px;display:flex;gap:14px;font-size:12px;color:var(--muted)}
+  .vcard .vmet b{color:var(--ink)}
+  .vcard .vact{margin-top:9px;font-size:12px;font-weight:700;padding-top:8px;border-top:1px dashed var(--ring)}
+  .vcard.v-ok .vact{color:#1a7a4c}.vcard.v-watch .vact{color:#b45f0a}.vcard.v-alert .vact{color:#c0392b}
+  .valesum{display:flex;gap:10px;flex-wrap:wrap}
+  .valesum .vchip{font-size:13px;font-weight:800;padding:8px 14px;border-radius:9px}
+  .valesum .vchip.ok{background:#e6f4ec;color:#1a7a4c}.valesum .vchip.watch{background:#fff3e0;color:#b45f0a}.valesum .vchip.alert{background:#fdecec;color:#c0392b}
   .acao{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px}
   .a-esc{background:#e6f4ec;color:#1a7a4c}.a-man{background:#fff3e0;color:#b45f0a}.a-cut{background:#fdecec;color:#c0392b}
   @media(max-width:820px){.wdays{grid-template-columns:repeat(4,1fr)}}
@@ -165,6 +180,7 @@
     <div class="tab" data-t="rel">📈 Meta</div>
     <div class="tab" data-t="google">🔍 Google</div>
     <div class="tab" data-t="marca">📣 Reconhecimento</div>
+    <div class="tab" data-t="vale">🏞️ Vale do Itajaí</div>
   </div>
 
   <!-- ================= CENTRO DE COMANDO ================= -->
@@ -211,7 +227,7 @@
       <h2>🌦️ Centro do clima · Pomerode <span class="tag">ao vivo</span></h2>
       <div id="cmd-wnow"></div>
       <div class="wdays" id="cmd-wdays"></div>
-      <div class="hint" style="margin-top:10px">🔴 chuva ≥5mm ou prob ≥70% → segure o pé nas vendas · 🟡 risco médio · 🟢 bom dia pra vender · fonte: Open-Meteo</div>
+      <div class="hint" style="margin-top:10px">🔴 chuva ≥5mm ou prob ≥70% → segure o pé nas vendas · 🟡 risco médio · 🟢 bom dia pra vender · <b>💰 = gasto recomendado em vendas no dia</b> (temporal→pausa · chuva→até R$100 · instável→~R$200 · bom→~R$350 · sol+FDS→R$450+) · fonte: Open-Meteo</div>
     </div></div>
 
     <div class="grid cols">
@@ -423,6 +439,25 @@
       <div id="rec-bw" class="bwrap"></div>
       <div class="hint">🎬 vídeo · 🖼️ imagem · clique no criativo (ou <b>↗</b>) pra abrir o post no Instagram · cabeçalho ordena.</div>
       <div class="tblwrap"><table><thead id="th-rec"></thead><tbody id="tb-rec"></tbody></table></div>
+    </div></div>
+  </div>
+
+  <!-- ================= VALE DO ITAJAÍ ================= -->
+  <div class="pane" id="vale">
+    <div class="grid"><div class="card full">
+      <h2>🏞️ Radar do Vale do Itajaí <span class="tag">ao vivo</span></h2>
+      <div class="hint">Nosso público vem das cidades vizinhas. Quando uma entra em situação crítica de chuva — como Blumenau embaixo d'água — <b>pausamos a venda pra aquela região antes</b> de gastar à toa e de anunciar diversão na hora errada. O risco olha a <b>chuva acumulada em 3 dias</b> (o que causa enchente), não só a do dia.</div>
+      <div class="valesum" id="vale-sum" style="margin:14px 0"></div>
+      <div class="valegrid" id="vale-grid"><div class="hint">Carregando cidades do Vale…</div></div>
+      <div class="hint" style="margin-top:12px">🟢 &lt;30mm normal · 🟡 30–80mm atenção · 🔴 &gt;80mm crítico (histórico de enchente na região) · fonte: Open-Meteo. Alerta de decisão de mídia — em evento real, sempre cruzar com a Defesa Civil.</div>
+    </div></div>
+    <div class="grid"><div class="card full">
+      <h2>Protocolo por nível de risco</h2>
+      <table><thead><tr><th>Nível</th><th>Vendas p/ a cidade</th><th>Criativos</th></tr></thead><tbody>
+        <tr><td><span class="badge b-good">🟢 Normal</span></td><td>rodam normal (regra de clima)</td><td>todos</td></tr>
+        <tr><td><span class="badge b-mid">🟡 Atenção</span></td><td>reduz teto, vira p/ antecipação</td><td>evita "vem hoje"</td></tr>
+        <tr><td><span class="badge b-bad">🔴 Crítico</span></td><td>pausa venda p/ a região</td><td>pausa "diversão" (sensibilidade de marca)</td></tr>
+      </tbody></table>
     </div></div>
   </div>
 
@@ -756,11 +791,14 @@ gDe.onchange=googleTab; gAte.onchange=googleTab;
 document.getElementById('g-tudo').onclick=()=>{gDe.value=gMin;gAte.value=gMax;googleTab();};
 
 /* ============ CENTRO DE COMANDO (aba inicial) ============ */
-const CMD={verbaMes:20000, lat:-26.74, lon:-49.18, metaEcom:161200}; /* metaEcom = meta de faturamento do canal Ecommerce no mes (atualizar mensal) */
+const CMD={verbaMes:20000, lat:-26.74, lon:-49.18, metaEcom:153000}; /* metaEcom = meta de faturamento do canal Ecommerce no mes (atualizar mensal) */
 const MESL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const WMO={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
 const wIco=c=>WMO[c]||'🌡️';
 const advis=(mm,prob)=> (mm>=5||prob>=70)?['bad','🔴 Segure o pé']:(mm>=1||prob>=50)?['mid','🟡 Atenção']:['ok','🟢 Bom dia'];
+/* gasto recomendado em VENDAS conforme o clima (regra do relatorio Verba x Clima) */
+const gastoClima=(mm,prob,wknd)=> mm>=15?'Pausar vendas':(mm>=5||prob>=70)?'Até R$ 100':(mm>=1||prob>=50)?'~R$ 200':(wknd?'R$ 450+':'~R$ 350');
+const ehFDS=t=>{const g=new Date(t+'T12:00:00').getDay();return g===0||g===6;};
 const semaf=(v,alvo)=>v<=alvo?'b-good':v<=alvo*1.5?'b-mid':'b-bad';
 let _magg={},_gagg={},_ragg=[],_cpaBlend=0,_vdMes=0,_diasCD=1,_diasNM=30;
 
@@ -869,16 +907,49 @@ function comando(){
   const wu=`https://api.open-meteo.com/v1/forecast?latitude=${CMD.lat}&longitude=${CMD.lon}&daily=weathercode,precipitation_sum,precipitation_probability_max,temperature_2m_max,temperature_2m_min&current=temperature_2m,weathercode&timezone=America/Sao_Paulo&forecast_days=7`;
   fetch(wu).then(r=>r.json()).then(w=>{
     const c=w.current,d=w.daily, a0=advis(d.precipitation_sum[0],d.precipitation_probability_max[0]);
-    document.getElementById('cmd-wnow').innerHTML=`<div class="wnow"><div class="we">${wIco(c.weathercode)}</div><div><div class="wt">${Math.round(c.temperature_2m)}°C</div><div style="opacity:.8;font-size:13px">Pomerode/SC agora</div></div><div class="wadv"><div class="big">${a0[1]}</div></div></div>`;
+    const g0=gastoClima(d.precipitation_sum[0],d.precipitation_probability_max[0],ehFDS(d.time[0]));
+    document.getElementById('cmd-wnow').innerHTML=`<div class="wnow"><div class="we">${wIco(c.weathercode)}</div><div><div class="wt">${Math.round(c.temperature_2m)}°C</div><div style="opacity:.8;font-size:13px">Pomerode/SC agora</div></div><div class="wadv"><div class="big">${a0[1]}</div><div style="opacity:.9;font-size:13px;margin-top:2px">Vendas hoje: <b>${g0}</b></div></div></div>`;
     const dn=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-    document.getElementById('cmd-wdays').innerHTML=d.time.map((t,i)=>{const dt=new Date(t+'T12:00:00'),a=advis(d.precipitation_sum[i],d.precipitation_probability_max[i]),bcl=a[0]==='ok'?'b-good':a[0]==='mid'?'b-mid':'b-bad';return `<div class="wday w-${a[0]}"><div class="wdn">${i===0?'Hoje':dn[dt.getDay()]} ${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}</div><div class="wde">${wIco(d.weathercode[i])}</div><div class="wdt">${Math.round(d.temperature_2m_min[i])}–${Math.round(d.temperature_2m_max[i])}°</div><div class="wdc">💧 ${d.precipitation_sum[i].toFixed(0)}mm · ${d.precipitation_probability_max[i]}%</div><span class="wds badge ${bcl}">${a[1].replace(/^.. /,'')}</span></div>`;}).join('');
+    document.getElementById('cmd-wdays').innerHTML=d.time.map((t,i)=>{const dt=new Date(t+'T12:00:00'),a=advis(d.precipitation_sum[i],d.precipitation_probability_max[i]),bcl=a[0]==='ok'?'b-good':a[0]==='mid'?'b-mid':'b-bad',g=gastoClima(d.precipitation_sum[i],d.precipitation_probability_max[i],ehFDS(t));return `<div class="wday w-${a[0]}"><div class="wdn">${i===0?'Hoje':dn[dt.getDay()]} ${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}</div><div class="wde">${wIco(d.weathercode[i])}</div><div class="wdt">${Math.round(d.temperature_2m_min[i])}–${Math.round(d.temperature_2m_max[i])}°</div><div class="wdc">💧 ${d.precipitation_sum[i].toFixed(0)}mm · ${d.precipitation_probability_max[i]}%</div><span class="wds badge ${bcl}">${a[1].replace(/^.. /,'')}</span><div class="wgasto">💰 ${g}</div></div>`;}).join('');
   }).catch(()=>{document.getElementById('cmd-wdays').innerHTML='<div class="hint">Clima indisponível no momento.</div>';});
 }
 
 // dispara o render inicial (agora que renderTabelas e as tabelas estao definidas)
+/* ============ RADAR DO VALE DO ITAJAÍ ============ */
+const VALE=[
+  {nm:'Pomerode',lat:-26.74,lon:-49.18,base:true},
+  {nm:'Blumenau',lat:-26.92,lon:-49.07},
+  {nm:'Gaspar',lat:-26.93,lon:-48.96},
+  {nm:'Timbó',lat:-26.82,lon:-49.27},
+  {nm:'Indaial',lat:-26.90,lon:-49.23},
+  {nm:'Itajaí',lat:-26.91,lon:-48.66},
+  {nm:'Brusque',lat:-27.10,lon:-48.92},
+  {nm:'Rio do Sul',lat:-27.21,lon:-49.64},
+  {nm:'Jaraguá do Sul',lat:-26.49,lon:-49.07}
+];
+const riscoVale=acc3=> acc3>=80?['alert','🔴 Crítico','Pausar venda p/ a região']:acc3>=30?['watch','🟡 Atenção','Reduzir e antecipar']:['ok','🟢 Normal','Rodar normal'];
+function valeRadar(){
+  const box=document.getElementById('vale-grid'); if(!box) return;
+  Promise.all(VALE.map(c=>{
+    const u=`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&daily=precipitation_sum,precipitation_probability_max&forecast_days=3&timezone=America/Sao_Paulo`;
+    return fetch(u).then(r=>r.json()).then(w=>{const acc3=(w.daily.precipitation_sum||[]).reduce((a,b)=>a+(b||0),0);const pm=Math.max(...(w.daily.precipitation_probability_max||[0]));return {...c,acc3,pm};});
+  })).then(res=>{
+    res.sort((a,b)=>b.acc3-a.acc3);
+    let nO=0,nW=0,nA=0;
+    box.innerHTML=res.map(c=>{const r=riscoVale(c.acc3);if(r[0]==='ok')nO++;else if(r[0]==='watch')nW++;else nA++;
+      return `<div class="vcard v-${r[0]}"><div class="vtop"><span class="vnm">${c.nm}${c.base?' ⭐':''}</span><span class="badge ${r[0]==='ok'?'b-good':r[0]==='watch'?'b-mid':'b-bad'}">${r[1]}</span></div><div class="vmet"><span>💧 3 dias: <b>${c.acc3.toFixed(0)}mm</b></span><span>prob <b>${c.pm}%</b></span></div><div class="vact">${r[2]}</div></div>`;}).join('');
+    const chips=[];
+    if(nA)chips.push(`<span class="vchip alert">🔴 ${nA} em situação crítica</span>`);
+    if(nW)chips.push(`<span class="vchip watch">🟡 ${nW} em atenção</span>`);
+    chips.push(`<span class="vchip ok">🟢 ${nO} normais</span>`);
+    document.getElementById('vale-sum').innerHTML=chips.join('');
+  }).catch(()=>{box.innerHTML='<div class="hint">Não consegui carregar as cidades agora.</div>';});
+}
+
 comando();
 relatorio();
 googleTab();
+valeRadar();
 })(); // fim do wrapper async (dados ao vivo)
 </script>
 </body>
