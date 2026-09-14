@@ -1074,25 +1074,34 @@ function comparativo(){
   function tTopo(id,A,B){const L=[['Investido',BRL(A.inv),BRL(B.inv),cpPct(A.inv,B.inv),false],['Alcance',fmtN(A.alc),fmtN(B.alc),cpPct(A.alc,B.alc),false],['Impressões',fmtN(A.impr),fmtN(B.impr),cpPct(A.impr,B.impr),false],['CPM',BRL2(A.cpm),BRL2(B.cpm),cpPct(A.cpm,B.cpm),true],['Custo/mil alc.',BRL2(A.cmil),BRL2(B.cmil),cpPct(A.cmil,B.cmil),true],['Frequência',A.freq.toFixed(2),B.freq.toFixed(2),cpPct(A.freq,B.freq),null]];
     document.getElementById(id).innerHTML=L.map(l=>`<tr><td class="name">${l[0]}</td><td>${l[1]}</td><td>${l[2]}</td><td>${l[4]===null?(l[3]>=0?'+':'')+l[3].toFixed(0)+'%':cpBadge(l[3],l[4])}</td></tr>`).join('');}
   tTopo('cp-rec',recA,recB); tTopo('cp-alc',alcA,alcB);
-  // ===== VEREDITO: valeu a pena? =====
+  // ===== DOIS PARECERES: topo + impacto no CPA =====
   const dAlcT=cpPct(topA.alc,topB.alc), dTinv=cpPct(topA.inv,topB.inv), dInvT=cpPct(invTotA,invTotB);
   const cpmA=topA.impr?topA.inv/topA.impr*1000:0, cpmB=topB.impr?topB.inv/topB.impr*1000:0, dCpm=cpPct(cpmA,cpmB);
   const dMv=cpPct(vA.mv,vB.mv), dMcpa=cpPct(vA.mCpa,vB.mCpa), dGv=cpPct(vA.gv,vB.gv);
-  const topoBom = dAlcT>30 && dCpm<25;   // escalou alcance sem estourar o custo
   const bReciente = diasAte(bAte)<=2;    // semana B ainda atribuindo vendas
-  let vd, vcls;
-  if(topoBom){ vd='🟢 Valeu a pena'; vcls='b-good'; }
-  else if(dAlcT>0){ vd='🟡 Parcial'; vcls='b-mid'; }
-  else { vd='🔴 Não valeu'; vcls='b-bad'; }
-  const tag=document.getElementById('cp-veredito-tag'); tag.textContent=vd.replace(/^.. /,''); tag.className='badge '+vcls;
+  // Parecer 1 — topo
+  const topoBom = dAlcT>30 && dCpm<25;
+  const p1 = topoBom?['b-good','🟢 Valeu']:(dAlcT>0?['b-mid','🟡 Parcial']:['b-bad','🔴 Não']);
+  // Parecer 2 — impacto no CPA (distorcido por atribuicao/outlier se semana recente)
+  const p2 = bReciente?['b-mid','🟡 Inconclusivo']:(dMcpa<=5?['b-good','🟢 Não piorou']:['b-bad','🔴 Piorou']);
+  const cor=c=>c==='b-good'?'#1a7a4c':c==='b-mid'?'#b45f0a':'#c0392b';
+  const tag=document.getElementById('cp-veredito-tag'); tag.textContent=p1[1].replace(/^.. /,'')+' topo'; tag.className='badge '+p1[0];
   document.getElementById('cp-leitura').innerHTML=
-    `<div style="font-size:19px;font-weight:800;margin-bottom:12px;color:${vcls==='b-good'?'#1a7a4c':vcls==='b-mid'?'#b45f0a':'#c0392b'}">${vd}</div>`+
-    `<b>📣 Topo (o principal foco):</b> a verba subiu ${cpBadge(dTinv)} e o alcance ${cpBadge(dAlcT)}, com o custo por mil (CPM) mexendo só ${cpBadge(dCpm,true)}. `+
-    `${topoBom?'<b>Escala bem absorvida</b> — cada real trouxe quase o mesmo tanto de gente. Objetivo de topo cumprido.':'Vigie o CPM — a escala encareceu o alcance.'}<br><br>`+
-    `<b>🛒 Vendas:</b> o CPA do Meta aparece ${cpBadge(dMcpa,true)} e as conversões do Google ${cpBadge(dGv)}. `+
-    `${bReciente?'<b>⚠️ Mas ainda não dá pra concluir sobre vendas:</b> a semana recente está subcontada (atribuição ~2 dias) e a semana anterior teve um dia atípico. Veredito de vendas confiável em 2-3 dias.':'Vendas já estabilizadas.'}<br><br>`+
-    `<b>💰 Verba total:</b> ${cpBadge(dInvT)} (${BRL(invTotA)} → ${BRL(invTotB)}).<br><br>`+
-    `<div style="background:#f7f2e4;border-radius:8px;padding:10px 12px;font-size:13px"><b>Resumo:</b> ${topoBom?'a nova verba de topo VALEU — mais que dobrou o público alcançado sem perder eficiência. O impacto em venda a gente confirma quando a atribuição fechar.':'resultado misto — reavaliar a alocação.'}</div>`;
+    // PARECER 1
+    `<div style="border-left:4px solid ${cor(p1[0])};padding:2px 0 2px 12px;margin-bottom:16px">`+
+      `<div style="font-weight:800;font-size:15px;color:${cor(p1[0])}">1 · Topo de funil — ${p1[1]}</div>`+
+      `<div style="margin-top:6px">Verba do topo ${cpBadge(dTinv)} → alcance ${cpBadge(dAlcT)}, com CPM (custo por mil) mexendo só ${cpBadge(dCpm,true)}. `+
+      `${topoBom?'<b>Escala bem absorvida:</b> quase o mesmo custo por pessoa, com muito mais gente cercada. Objetivo de topo cumprido.':'a escala encareceu o alcance — vigiar.'}</div>`+
+    `</div>`+
+    // PARECER 2
+    `<div style="border-left:4px solid ${cor(p2[0])};padding:2px 0 2px 12px">`+
+      `<div style="font-weight:800;font-size:15px;color:${cor(p2[0])}">2 · Impacto no CPA — ${p2[1]}</div>`+
+      `<div style="margin-top:6px">O CPA do Meta variou ${cpBadge(dMcpa,true)} entre os períodos. `+
+      `${bReciente?'<b>Mas ainda não dá pra atribuir esse movimento ao topo:</b> a semana recente está subcontada (atribuição ~2 dias) e a anterior teve um dia atípico (06/09). ':''}`+
+      `<br><br><b>Importante:</b> aumentar o topo <b>não mexe no CPA da mesma semana</b> — o público cercado agora converte nas <b>próximas semanas</b> (via remarketing e busca de marca). O ganho de CPA do topo é <b>defasado</b>. `+
+      `O veredito real sai daqui a 2-3 semanas, olhando se o remarketing/marca ficou mais barato.</div>`+
+    `</div>`+
+    `<div style="background:#f7f2e4;border-radius:8px;padding:10px 12px;font-size:13px;margin-top:14px"><b>Resumo:</b> ${topoBom?'o topo <b>valeu</b> (dobrou o alcance sem perder eficiência). O retorno em venda mais barato deve aparecer nas próximas semanas — é o que vamos medir.':'resultado de topo misto; reavaliar alocação.'}</div>`;
 }
 var cpA_de,cpA_ate,cpB_de,cpB_ate;
 (function initComp(){
