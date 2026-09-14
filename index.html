@@ -39,6 +39,21 @@
   .kpi .val{font-size:22px;font-weight:800;margin-top:8px;color:var(--green);white-space:nowrap}
   .kpi .val.orange{color:var(--orange-d)}
   .kpi::after{display:none}
+  /* comparativo A x B */
+  .cp-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px}
+  .cp-pill{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:8px 14px;border-radius:10px}
+  .cp-pill.a{background:#eef0ef;color:#5b6b62}.cp-pill.b{background:#e6f4ec;color:#1a7a4c}
+  .cp-pill .dot{width:9px;height:9px;border-radius:50%}.cp-pill.a .dot{background:#98a29b}.cp-pill.b .dot{background:#1a7a4c}
+  .cp-pill small{font-weight:600;opacity:.75;text-transform:uppercase;letter-spacing:.5px;font-size:10px}
+  .cp-arrow{color:var(--muted);font-weight:800}
+  .cp-kpi .lbl{font-size:11px}
+  .cp-ab{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+  .cp-r{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-variant-numeric:tabular-nums}
+  .cp-r .dt{font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .cp-r .v{font-size:16px;font-weight:800;color:var(--muted)}
+  .cp-r.b .dt{color:#1a7a4c}.cp-r.b .v{font-size:20px;color:var(--green)}
+  .cp-dl{margin-top:9px;padding-top:8px;border-top:1px dashed var(--ring);text-align:center}
+  .cp-warn{background:#fff3e0;border:1px solid #f0c98a;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#8a5a0a;margin-top:10px;display:flex;gap:9px;align-items:flex-start}
   .cols{grid-template-columns:1fr 1fr}
   @media(max-width:900px){.cols{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--ring);border-radius:18px;padding:22px}
@@ -180,6 +195,7 @@
     <div class="tab" data-t="rel">📈 Meta</div>
     <div class="tab" data-t="google">🔍 Google</div>
     <div class="tab" data-t="marca">📣 Reconhecimento</div>
+    <div class="tab" data-t="comp">📊 Comparativo</div>
     <div class="tab" data-t="vale">🏞️ Vale do Itajaí</div>
   </div>
 
@@ -440,6 +456,51 @@
       <div class="hint">🎬 vídeo · 🖼️ imagem · clique no criativo (ou <b>↗</b>) pra abrir o post no Instagram · cabeçalho ordena.</div>
       <div class="tblwrap"><table><thead id="th-rec"></thead><tbody id="tb-rec"></tbody></table></div>
     </div></div>
+  </div>
+
+  <!-- ================= COMPARATIVO ================= -->
+  <div class="pane" id="comp">
+    <div class="grid"><div class="card full">
+      <h2>📊 Comparativo de períodos <span class="tag">vendas · topo</span></h2>
+      <div class="hint">Compara <b>vendas</b> (Meta + Google) e <b>topo de funil</b> (alcance/reconhecimento) entre dois períodos. Padrão: <b>verba antiga</b> (31/08–06/09) × <b>verba nova</b> (07/09–13/09).</div>
+      <div class="controls">
+        <div class="ctl"><label>Período A · De</label><input type="date" id="cp-a-de"></div>
+        <div class="ctl"><label>Até</label><input type="date" id="cp-a-ate"></div>
+        <span style="align-self:end;padding:0 8px;color:var(--muted);font-weight:800">vs</span>
+        <div class="ctl"><label>Período B · De</label><input type="date" id="cp-b-de"></div>
+        <div class="ctl"><label>Até</label><input type="date" id="cp-b-ate"></div>
+        <button class="btn ghost" id="cp-reset">↺ Semanas (padrão)</button>
+      </div>
+      <div class="cp-head" id="cp-head"></div>
+      <div class="cp-warn" id="cp-warn" style="display:none"></div>
+    </div></div>
+
+    <!-- KPIs de destaque -->
+    <div class="grid kpis kpis7" id="cp-kpis"></div>
+
+    <!-- grafico de variacao + leitura -->
+    <div class="grid cols">
+      <div class="card"><h2>📈 Variação por indicador <span class="tag">A → B</span></h2>
+        <div class="hint">Quanto cada indicador mudou do período A para o B (verde = melhora).</div>
+        <div class="chart-box" style="height:300px"><canvas id="cp-chart"></canvas></div></div>
+      <div class="card"><h2>📝 Leitura</h2>
+        <div id="cp-leitura" style="font-size:14px;line-height:1.6"></div></div>
+    </div>
+
+    <!-- vendas por campanha -->
+    <div class="grid"><div class="card full">
+      <h2>🛒 Vendas — por campanha</h2>
+      <div class="hint">Investido · vendas · custo por venda (CPA) em cada período. 🟢 CPA caiu · 🔴 CPA subiu.</div>
+      <div class="tblwrap"><table><thead><tr><th>Campanha</th><th>Inv A</th><th>Vd A</th><th>CPA A</th><th>Inv B</th><th>Vd B</th><th>CPA B</th><th>Δ CPA</th></tr></thead><tbody id="cp-vend"></tbody></table></div>
+    </div></div>
+
+    <!-- topo -->
+    <div class="grid cols">
+      <div class="card"><h2>📣 Reconhecimento</h2>
+        <div class="tblwrap"><table><thead><tr><th>Métrica</th><th>A</th><th>B</th><th>Δ</th></tr></thead><tbody id="cp-rec"></tbody></table></div></div>
+      <div class="card"><h2>📢 Alcance</h2>
+        <div class="tblwrap"><table><thead><tr><th>Métrica</th><th>A</th><th>B</th><th>Δ</th></tr></thead><tbody id="cp-alc"></tbody></table></div></div>
+    </div>
   </div>
 
   <!-- ================= VALE DO ITAJAÍ ================= -->
@@ -946,10 +1007,96 @@ function valeRadar(){
   }).catch(()=>{box.innerHTML='<div class="hint">Não consegui carregar as cidades agora.</div>';});
 }
 
+/* ============ COMPARATIVO DE PERÍODOS (vendas + topo) ============ */
+let cpChart;
+const cpIso=dm=>{const p=(dm||'').split('/');return p.length>=2?`2026-${p[1]}-${p[0]}`:'';}; // DD/MM -> ISO
+const cpPct=(x,y)=>x?(y-x)/x*100:0;
+const cpBadge=(d,inv=false)=>{const good=inv?d<0:d>0;const cls=Math.abs(d)<1?'b-mid':(good?'b-good':'b-bad');return `<span class="badge ${cls}">${d>=0?'+':''}${d.toFixed(0)}%</span>`;};
+// topo (brand, datas ISO)
+function cpTopo(rows,de,ate){let inv=0,impr=0,alc=0;for(const r of rows){if(!r[0]||r[0]<de||r[0]>ate)continue;inv+=r[2];impr+=r[3];alc+=r[4];}return {inv,impr,alc,cpm:impr?inv/impr*1000:0,cmil:alc?inv/alc*1000:0,freq:alc?impr/alc:0};}
+// vendas (CAMPD Meta /Vendas/ + GCAMPD Google), datas DD/MM
+function cpVendas(de,ate){
+  let mi=0,mv=0,mf=0,gi=0,gv=0,gf=0;
+  CAMPD.forEach(r=>{if(!/Vendas/i.test(r[1]))return;const i=cpIso(r[0]);if(i<de||i>ate)return;mi+=r[2];mv+=r[7];mf+=r[8];});
+  GCAMPD.forEach(r=>{const i=cpIso(r[0]);if(i<de||i>ate)return;gi+=r[2];gv+=r[5];gf+=r[6];});
+  return {mi,mv,mf,gi,gv,gf,invTot:mi+gi,mCpa:mv?mi/mv:0,mRoas:mi?mf/mi:0,gCpa:gv?gi/gv:0,gRoas:gi?gf/gi:0};
+}
+function comparativo(){
+  const aDe=cpA_de.value,aAte=cpA_ate.value,bDe=cpB_de.value,bAte=cpB_ate.value;
+  const vA=cpVendas(aDe,aAte), vB=cpVendas(bDe,bAte);
+  const recA=cpTopo(BRANDREC,aDe,aAte),recB=cpTopo(BRANDREC,bDe,bAte);
+  const alcA=cpTopo(BRANDALC,aDe,aAte),alcB=cpTopo(BRANDALC,bDe,bAte);
+  const topA={inv:recA.inv+alcA.inv,alc:recA.alc+alcA.alc},topB={inv:recB.inv+alcB.inv,alc:recB.alc+alcB.alc};
+  const invTotA=vA.invTot+topA.inv,invTotB=vB.invTot+topB.inv;
+  // barra de periodos + datas
+  const fmtD=iso=>{const p=(iso||'').split('-');return p.length>=3?p[2]+'/'+p[1]:iso;};
+  const dA=fmtD(aDe)+' a '+fmtD(aAte), dB=fmtD(bDe)+' a '+fmtD(bAte);
+  document.getElementById('cp-head').innerHTML=
+    `<div class="cp-pill a"><span class="dot"></span><div><small>Período A · verba antiga</small><br>${dA}</div></div>`+
+    `<span class="cp-arrow">→</span>`+
+    `<div class="cp-pill b"><span class="dot"></span><div><small>Período B · verba nova</small><br>${dB}</div></div>`;
+  // aviso de atribuicao (Periodo B recente subconta vendas)
+  let maxIso=''; METAD.forEach(r=>{const i=cpIso(r[0]);if(i>maxIso)maxIso=i;});
+  const diasAte=(iso)=>{if(!iso||!maxIso)return 99;return Math.round((new Date(maxIso)-new Date(iso))/864e5);};
+  const w=document.getElementById('cp-warn');
+  if(diasAte(bAte)<=2){ w.style.display='flex'; w.innerHTML=`<span>⚠️</span><div><b>Atenção à atribuição:</b> o Período B termina em ${fmtD(bAte)}, mas o Meta leva ~2 dias pra contabilizar as vendas. As <b>vendas e o faturamento do Período B estão subcontados</b> — a queda real é menor do que aparece. O alcance/topo não sofre esse atraso.</div>`; }
+  else w.style.display='none';
+  // KPIs de destaque (A e B com datas)
+  const kpi=(l,a,b,fmt,inv=false)=>{const d=cpPct(a,b);return `<div class="kpi cp-kpi"><div class="lbl">${l}</div><div class="cp-ab"><div class="cp-r"><span class="dt">${dA}</span><span class="v">${fmt(a)}</span></div><div class="cp-r b"><span class="dt">${dB}</span><span class="v">${fmt(b)}</span></div></div><div class="cp-dl">${cpBadge(d,inv)}</div></div>`;};
+  document.getElementById('cp-kpis').innerHTML=
+    kpi('Investimento total',invTotA,invTotB,BRL)+
+    kpi('🛒 Meta · Vendas',vA.mv,vB.mv,x=>Math.round(x).toLocaleString('pt-BR'))+
+    kpi('🛒 Meta · Faturamento',vA.mf,vB.mf,BRL)+
+    kpi('🛒 Meta · CPA',vA.mCpa,vB.mCpa,BRL2,true)+
+    kpi('🔍 Google · Conversões',vA.gv,vB.gv,x=>Math.round(x).toLocaleString('pt-BR'))+
+    kpi('🔍 Google · Valor conv.',vA.gf,vB.gf,BRL)+
+    kpi('📣 Alcance (topo)',topA.alc,topB.alc,fmtN);
+  // grafico de variacao (Meta e Google separados)
+  const inds=[['Meta Fatur.',cpPct(vA.mf,vB.mf),0],['Meta Vendas',cpPct(vA.mv,vB.mv),0],['Meta CPA',cpPct(vA.mCpa,vB.mCpa),1],
+    ['Google Valor',cpPct(vA.gf,vB.gf),0],['Alcance topo',cpPct(topA.alc,topB.alc),0],['Invest. total',cpPct(invTotA,invTotB),2]];
+  const cols=inds.map(x=>{const d=x[1];if(x[2]===2)return '#6d7f75';const good=x[2]===1?d<0:d>0;return good?'#1a7a4c':'#c0392b';});
+  const dataC={labels:inds.map(x=>x[0]),datasets:[{label:'Variação %',data:inds.map(x=>+x[1].toFixed(0)),backgroundColor:cols,borderRadius:5}]};
+  const optC={indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>(c.parsed.x>=0?'+':'')+c.parsed.x+'%'}}},scales:{x:{ticks:{callback:v=>v+'%'},grid:{color:'#eef2f0'}},y:{grid:{display:false}}}};
+  if(cpChart){cpChart.data=dataC;cpChart.options=optC;cpChart.update();}else cpChart=new Chart(document.getElementById('cp-chart'),{type:'bar',data:dataC,options:optC});
+  // vendas por campanha
+  const vmap={};
+  const add=(nome,i,de,ate,slot)=>{const iso=cpIso(i);if(iso<de||iso>ate)return false;return true;};
+  CAMPD.forEach(r=>{ if(!/Vendas/i.test(r[1]))return; const nm=r[1].replace(/^SP_(FB\d+_)?/,'').replace(/_/g,' ');
+    const o=vmap[nm]||(vmap[nm]={ai:0,av:0,bi:0,bv:0}); const iso=cpIso(r[0]);
+    if(iso>=aDe&&iso<=aAte){o.ai+=r[2];o.av+=r[7];} if(iso>=bDe&&iso<=bAte){o.bi+=r[2];o.bv+=r[7];} });
+  const linhasV=Object.entries(vmap).filter(([k,o])=>o.ai>0||o.bi>0).sort((x,y)=>(y[1].bi+y[1].ai)-(x[1].bi+x[1].ai)).map(([nm,o])=>{
+    const ca=o.av?o.ai/o.av:0,cb=o.bv?o.bi/o.bv:0,d=cpPct(ca,cb);
+    return `<tr><td class="name">${nm.slice(0,24)}</td><td>${BRL(o.ai)}</td><td>${Math.round(o.av)}</td><td>${o.av?BRL2(ca):'—'}</td><td>${BRL(o.bi)}</td><td>${Math.round(o.bv)}</td><td>${o.bv?BRL2(cb):'—'}</td><td>${(o.av&&o.bv)?cpBadge(d,true):'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('cp-vend').innerHTML=linhasV||'<tr><td colspan=8 class=mut>sem dados</td></tr>';
+  // topo tabelas
+  function tTopo(id,A,B){const L=[['Investido',BRL(A.inv),BRL(B.inv),cpPct(A.inv,B.inv),false],['Alcance',fmtN(A.alc),fmtN(B.alc),cpPct(A.alc,B.alc),false],['Impressões',fmtN(A.impr),fmtN(B.impr),cpPct(A.impr,B.impr),false],['CPM',BRL2(A.cpm),BRL2(B.cpm),cpPct(A.cpm,B.cpm),true],['Custo/mil alc.',BRL2(A.cmil),BRL2(B.cmil),cpPct(A.cmil,B.cmil),true],['Frequência',A.freq.toFixed(2),B.freq.toFixed(2),cpPct(A.freq,B.freq),null]];
+    document.getElementById(id).innerHTML=L.map(l=>`<tr><td class="name">${l[0]}</td><td>${l[1]}</td><td>${l[2]}</td><td>${l[4]===null?(l[3]>=0?'+':'')+l[3].toFixed(0)+'%':cpBadge(l[3],l[4])}</td></tr>`).join('');}
+  tTopo('cp-rec',recA,recB); tTopo('cp-alc',alcA,alcB);
+  // leitura
+  const dMf=cpPct(vA.mf,vB.mf),dMv=cpPct(vA.mv,vB.mv),dMcpa=cpPct(vA.mCpa,vB.mCpa),dGf=cpPct(vA.gf,vB.gf),dGv=cpPct(vA.gv,vB.gv),dAlcT=cpPct(topA.alc,topB.alc),dInvT=cpPct(invTotA,invTotB);
+  document.getElementById('cp-leitura').innerHTML=
+    `<div style="background:#eef2f0;border-radius:8px;padding:9px 12px;font-size:12px;color:#5b6b62;margin-bottom:12px">ℹ️ <b>Meta e Google não se somam</b> — cada um conta a mesma venda do seu jeito (o Google inclui conversões como visita à loja). Por isso aparecem <b>separados</b>.</div>`+
+    `<b>Investimento total:</b> ${cpBadge(dInvT)} (${BRL(invTotA)} → ${BRL(invTotB)})<br><br>`+
+    `<b>🛒 Meta:</b> faturamento ${cpBadge(dMf)}, vendas ${cpBadge(dMv)}, CPA ${cpBadge(dMcpa,true)}.<br><br>`+
+    `<b>🔍 Google:</b> conversões ${cpBadge(dGv)}, valor ${cpBadge(dGf)}.<br><br>`+
+    `<b>📣 Topo:</b> alcance ${cpBadge(dAlcT)} — dado sólido (não sofre atraso de atribuição).`;
+}
+var cpA_de,cpA_ate,cpB_de,cpB_ate;
+(function initComp(){
+  cpA_de=document.getElementById('cp-a-de');cpA_ate=document.getElementById('cp-a-ate');
+  cpB_de=document.getElementById('cp-b-de');cpB_ate=document.getElementById('cp-b-ate');
+  const pad=()=>{cpA_de.value='2026-08-31';cpA_ate.value='2026-09-06';cpB_de.value='2026-09-07';cpB_ate.value='2026-09-13';};
+  pad();
+  [cpA_de,cpA_ate,cpB_de,cpB_ate].forEach(e=>e.onchange=comparativo);
+  document.getElementById('cp-reset').onclick=()=>{pad();comparativo();};
+})();
+
 comando();
 relatorio();
 googleTab();
 valeRadar();
+comparativo();
 })(); // fim do wrapper async (dados ao vivo)
 </script>
 </body>
