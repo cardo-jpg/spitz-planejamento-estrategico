@@ -483,7 +483,7 @@
       <div class="card"><h2>📈 Variação por indicador <span class="tag">A → B</span></h2>
         <div class="hint">Quanto cada indicador mudou do período A para o B (verde = melhora).</div>
         <div class="chart-box" style="height:300px"><canvas id="cp-chart"></canvas></div></div>
-      <div class="card"><h2>📝 Leitura</h2>
+      <div class="card"><h2>🏁 Valeu a pena? <span class="tag" id="cp-veredito-tag">—</span></h2>
         <div id="cp-leitura" style="font-size:14px;line-height:1.6"></div></div>
     </div>
 
@@ -1026,7 +1026,7 @@ function comparativo(){
   const vA=cpVendas(aDe,aAte), vB=cpVendas(bDe,bAte);
   const recA=cpTopo(BRANDREC,aDe,aAte),recB=cpTopo(BRANDREC,bDe,bAte);
   const alcA=cpTopo(BRANDALC,aDe,aAte),alcB=cpTopo(BRANDALC,bDe,bAte);
-  const topA={inv:recA.inv+alcA.inv,alc:recA.alc+alcA.alc},topB={inv:recB.inv+alcB.inv,alc:recB.alc+alcB.alc};
+  const topA={inv:recA.inv+alcA.inv,alc:recA.alc+alcA.alc,impr:recA.impr+alcA.impr},topB={inv:recB.inv+alcB.inv,alc:recB.alc+alcB.alc,impr:recB.impr+alcB.impr};
   const invTotA=vA.invTot+topA.inv,invTotB=vB.invTot+topB.inv;
   // barra de periodos + datas
   const fmtD=iso=>{const p=(iso||'').split('-');return p.length>=3?p[2]+'/'+p[1]:iso;};
@@ -1046,14 +1046,15 @@ function comparativo(){
   document.getElementById('cp-kpis').innerHTML=
     kpi('Investimento total',invTotA,invTotB,BRL)+
     kpi('🛒 Meta · Vendas',vA.mv,vB.mv,x=>Math.round(x).toLocaleString('pt-BR'))+
-    kpi('🛒 Meta · Faturamento',vA.mf,vB.mf,BRL)+
     kpi('🛒 Meta · CPA',vA.mCpa,vB.mCpa,BRL2,true)+
     kpi('🔍 Google · Conversões',vA.gv,vB.gv,x=>Math.round(x).toLocaleString('pt-BR'))+
-    kpi('🔍 Google · Valor conv.',vA.gf,vB.gf,BRL)+
-    kpi('📣 Alcance (topo)',topA.alc,topB.alc,fmtN);
-  // grafico de variacao (Meta e Google separados)
-  const inds=[['Meta Fatur.',cpPct(vA.mf,vB.mf),0],['Meta Vendas',cpPct(vA.mv,vB.mv),0],['Meta CPA',cpPct(vA.mCpa,vB.mCpa),1],
-    ['Google Valor',cpPct(vA.gf,vB.gf),0],['Alcance topo',cpPct(topA.alc,topB.alc),0],['Invest. total',cpPct(invTotA,invTotB),2]];
+    kpi('🔍 Google · CPA',vA.gCpa,vB.gCpa,BRL2,true)+
+    kpi('📣 Alcance (topo)',topA.alc,topB.alc,fmtN)+
+    kpi('📣 Invest. topo',topA.inv,topB.inv,BRL);
+  // grafico de variacao (sem faturamento — Meta/Google separados)
+  const inds=[['Meta Vendas',cpPct(vA.mv,vB.mv),0],['Meta CPA',cpPct(vA.mCpa,vB.mCpa),1],
+    ['Google Conv.',cpPct(vA.gv,vB.gv),0],['Alcance topo',cpPct(topA.alc,topB.alc),0],
+    ['Invest. topo',cpPct(topA.inv,topB.inv),2],['Invest. total',cpPct(invTotA,invTotB),2]];
   const cols=inds.map(x=>{const d=x[1];if(x[2]===2)return '#6d7f75';const good=x[2]===1?d<0:d>0;return good?'#1a7a4c':'#c0392b';});
   const dataC={labels:inds.map(x=>x[0]),datasets:[{label:'Variação %',data:inds.map(x=>+x[1].toFixed(0)),backgroundColor:cols,borderRadius:5}]};
   const optC={indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>(c.parsed.x>=0?'+':'')+c.parsed.x+'%'}}},scales:{x:{ticks:{callback:v=>v+'%'},grid:{color:'#eef2f0'}},y:{grid:{display:false}}}};
@@ -1073,14 +1074,25 @@ function comparativo(){
   function tTopo(id,A,B){const L=[['Investido',BRL(A.inv),BRL(B.inv),cpPct(A.inv,B.inv),false],['Alcance',fmtN(A.alc),fmtN(B.alc),cpPct(A.alc,B.alc),false],['Impressões',fmtN(A.impr),fmtN(B.impr),cpPct(A.impr,B.impr),false],['CPM',BRL2(A.cpm),BRL2(B.cpm),cpPct(A.cpm,B.cpm),true],['Custo/mil alc.',BRL2(A.cmil),BRL2(B.cmil),cpPct(A.cmil,B.cmil),true],['Frequência',A.freq.toFixed(2),B.freq.toFixed(2),cpPct(A.freq,B.freq),null]];
     document.getElementById(id).innerHTML=L.map(l=>`<tr><td class="name">${l[0]}</td><td>${l[1]}</td><td>${l[2]}</td><td>${l[4]===null?(l[3]>=0?'+':'')+l[3].toFixed(0)+'%':cpBadge(l[3],l[4])}</td></tr>`).join('');}
   tTopo('cp-rec',recA,recB); tTopo('cp-alc',alcA,alcB);
-  // leitura
-  const dMf=cpPct(vA.mf,vB.mf),dMv=cpPct(vA.mv,vB.mv),dMcpa=cpPct(vA.mCpa,vB.mCpa),dGf=cpPct(vA.gf,vB.gf),dGv=cpPct(vA.gv,vB.gv),dAlcT=cpPct(topA.alc,topB.alc),dInvT=cpPct(invTotA,invTotB);
+  // ===== VEREDITO: valeu a pena? =====
+  const dAlcT=cpPct(topA.alc,topB.alc), dTinv=cpPct(topA.inv,topB.inv), dInvT=cpPct(invTotA,invTotB);
+  const cpmA=topA.impr?topA.inv/topA.impr*1000:0, cpmB=topB.impr?topB.inv/topB.impr*1000:0, dCpm=cpPct(cpmA,cpmB);
+  const dMv=cpPct(vA.mv,vB.mv), dMcpa=cpPct(vA.mCpa,vB.mCpa), dGv=cpPct(vA.gv,vB.gv);
+  const topoBom = dAlcT>30 && dCpm<25;   // escalou alcance sem estourar o custo
+  const bReciente = diasAte(bAte)<=2;    // semana B ainda atribuindo vendas
+  let vd, vcls;
+  if(topoBom){ vd='🟢 Valeu a pena'; vcls='b-good'; }
+  else if(dAlcT>0){ vd='🟡 Parcial'; vcls='b-mid'; }
+  else { vd='🔴 Não valeu'; vcls='b-bad'; }
+  const tag=document.getElementById('cp-veredito-tag'); tag.textContent=vd.replace(/^.. /,''); tag.className='badge '+vcls;
   document.getElementById('cp-leitura').innerHTML=
-    `<div style="background:#eef2f0;border-radius:8px;padding:9px 12px;font-size:12px;color:#5b6b62;margin-bottom:12px">ℹ️ <b>Meta e Google não se somam</b> — cada um conta a mesma venda do seu jeito (o Google inclui conversões como visita à loja). Por isso aparecem <b>separados</b>.</div>`+
-    `<b>Investimento total:</b> ${cpBadge(dInvT)} (${BRL(invTotA)} → ${BRL(invTotB)})<br><br>`+
-    `<b>🛒 Meta:</b> faturamento ${cpBadge(dMf)}, vendas ${cpBadge(dMv)}, CPA ${cpBadge(dMcpa,true)}.<br><br>`+
-    `<b>🔍 Google:</b> conversões ${cpBadge(dGv)}, valor ${cpBadge(dGf)}.<br><br>`+
-    `<b>📣 Topo:</b> alcance ${cpBadge(dAlcT)} — dado sólido (não sofre atraso de atribuição).`;
+    `<div style="font-size:19px;font-weight:800;margin-bottom:12px;color:${vcls==='b-good'?'#1a7a4c':vcls==='b-mid'?'#b45f0a':'#c0392b'}">${vd}</div>`+
+    `<b>📣 Topo (o principal foco):</b> a verba subiu ${cpBadge(dTinv)} e o alcance ${cpBadge(dAlcT)}, com o custo por mil (CPM) mexendo só ${cpBadge(dCpm,true)}. `+
+    `${topoBom?'<b>Escala bem absorvida</b> — cada real trouxe quase o mesmo tanto de gente. Objetivo de topo cumprido.':'Vigie o CPM — a escala encareceu o alcance.'}<br><br>`+
+    `<b>🛒 Vendas:</b> o CPA do Meta aparece ${cpBadge(dMcpa,true)} e as conversões do Google ${cpBadge(dGv)}. `+
+    `${bReciente?'<b>⚠️ Mas ainda não dá pra concluir sobre vendas:</b> a semana recente está subcontada (atribuição ~2 dias) e a semana anterior teve um dia atípico. Veredito de vendas confiável em 2-3 dias.':'Vendas já estabilizadas.'}<br><br>`+
+    `<b>💰 Verba total:</b> ${cpBadge(dInvT)} (${BRL(invTotA)} → ${BRL(invTotB)}).<br><br>`+
+    `<div style="background:#f7f2e4;border-radius:8px;padding:10px 12px;font-size:13px"><b>Resumo:</b> ${topoBom?'a nova verba de topo VALEU — mais que dobrou o público alcançado sem perder eficiência. O impacto em venda a gente confirma quando a atribuição fechar.':'resultado misto — reavaliar a alocação.'}</div>`;
 }
 var cpA_de,cpA_ate,cpB_de,cpB_ate;
 (function initComp(){
