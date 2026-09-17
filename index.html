@@ -511,6 +511,18 @@
 
     <div class="grid imp-eq" id="ip-eq"></div>
 
+    <div class="grid"><div class="card full">
+      <h2>🎬 Funil de atenção da marca <span class="tag">qualidade de marca · sem venda</span></h2>
+      <div class="hint">O caminho da <b>atenção</b>: de cada impressão, quantos <b>param pra assistir</b>, quantos <b>ficam até o fim</b>. São métricas de topo puras — medem se o conteúdo prende e constrói marca, <b>sem passar por venda nenhuma</b>.</div>
+      <div class="efunnel" id="ip-funnel"></div>
+    </div></div>
+
+    <div class="grid"><div class="card full">
+      <h2>⚡ Eficiência de topo <span class="tag">custo em moeda de marca</span></h2>
+      <div class="hint">Quanto custa cada resultado de marca — alcance, atenção, interação, interesse. Nenhum deles depende de uma venda acontecer.</div>
+      <div class="grid kpis" id="ip-eff" style="margin-top:2px"></div>
+    </div></div>
+
     <div class="grid cols">
       <div class="card"><h2>💸 Custo pra impactar mil pessoas <span class="tag">marca × venda</span></h2>
         <div class="hint">O CPM (custo por mil impressões) da marca ao lado do de uma campanha de venda. Mesma exposição, fração do preço.</div>
@@ -523,9 +535,10 @@
     </div>
 
     <div class="grid"><div class="card full">
-      <h2>🔄 O círculo virtuoso <span class="tag">marca → venda</span></h2>
-      <div class="hint">Por que marca barata importa: ela aquece a região, e é por isso que a venda fecha barato (CPA baixo, ROAS alto).</div>
+      <h2>🤝 Duas frentes, um crescimento <span class="tag">marca + venda</span></h2>
+      <div class="hint">São <b>dois trabalhos diferentes</b>, cada um com seus próprios números. Em cima, <b>marca</b> (lembrança e desejo na região). Embaixo, <b>venda</b> (conversão eficiente). Um não substitui o outro — é a soma que faz o Spitz crescer.</div>
       <div class="imp-flow" id="ip-flow"></div>
+      <div style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px;font-weight:600">Cortar o topo não baixa o custo da venda de amanhã · cortar o fundo não constrói marca. <b style="color:var(--green)">As duas frentes se complementam.</b></div>
     </div></div>
 
     <div class="grid"><div class="imp-verdict" id="ip-verdict"></div></div>
@@ -1191,12 +1204,12 @@ let ipChart;
 const POP_POMERODE=35556; // IBGE 2022
 const ipBig=n=>n>=1e6?(n/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2})+' mi':fmtN(Math.round(n));
 function ipTopo(de,ate){ // datas ISO
-  let inv=0,impr=0,alc=0,v3=0,inter=0,clk=0,vp=0;
+  let inv=0,impr=0,alc=0,v3=0,inter=0,p25=0,p75=0,clk=0,vp=0;
   [BRANDALC,BRANDREC].forEach(rows=>rows.forEach(r=>{
     if(!r[0]||r[0]<de||r[0]>ate)return;
-    inv+=r[2];impr+=r[3];alc+=r[4];v3+=r[5];inter+=r[6];clk+=r[9];vp+=r[10];
+    inv+=r[2];impr+=r[3];alc+=r[4];v3+=r[5];inter+=r[6];p25+=r[7];p75+=r[8];clk+=r[9];vp+=r[10];
   }));
-  return {inv,impr,alc,v3,inter,clk,vp,cpm:impr?inv/impr*1000:0};
+  return {inv,impr,alc,v3,inter,p25,p75,clk,vp,cpm:impr?inv/impr*1000:0,freq:alc?impr/alc:0};
 }
 function ipSales(de,ate){ // datas ISO
   let mi=0,mimp=0,mv=0,mf=0,gi=0,gv=0,gf=0;
@@ -1231,6 +1244,29 @@ function impacto(){
     ['🎬',ipBig(T.v3),'visualizações de<br>vídeo (3s+)'],
     ['❤️',ipBig(T.inter),'interações<br>(curtidas, coment., salvos)']
   ].map(e=>`<div class="eqc"><div class="ico">${e[0]}</div><div class="n">${e[1]}</div><div class="d">${e[2]}</div></div>`).join('');
+  // FUNIL DE ATENCAO (topo puro: impressoes -> 3s -> 25% -> 75%)
+  const FA=[
+    {n:'Impressões',v:T.impr,w:100,cost:[['CPM',T.cpm]]},
+    {n:'Assistiram 3s+',v:T.v3,w:80,conv:['Pararam pra ver',T.impr?T.v3/T.impr*100:0],cost:[['Custo/view',T.v3?T.inv/T.v3:0]]},
+    {n:'Chegaram a 25%',v:T.p25,w:58,conv:['Retenção',T.v3?T.p25/T.v3*100:0]},
+    {n:'Assistiram 75%',v:T.p75,w:40,conv:['Ficaram até o fim',T.p25?T.p75/T.p25*100:0]}
+  ];
+  document.getElementById('ip-funnel').innerHTML=FA.map((s,i)=>`
+    <div class="efstep">
+      <div class="efconv">${s.conv?`${pct(s.conv[1])}<small>${s.conv[0]}</small>`:''}</div>
+      <div class="efbar" style="width:${s.w}%;background:${FC2[i]}"><b>${fmtN(s.v)}</b><span>${s.n}</span></div>
+      <div class="efcost">${(s.cost||[]).map(c=>`<div class="pill2">${BRL2(c[1])}<small>${c[0]}</small></div>`).join('')}</div>
+    </div>`).join('');
+  // EFICIENCIA DE TOPO (moeda de marca, nada de CPA)
+  const eff=[
+    ['CPM · mil impressões',BRL2(T.cpm)],
+    ['Custo · mil alcançados',BRL2(T.alc?T.inv/T.alc*1000:0)],
+    ['Custo por view de vídeo',T.v3?BRL2(T.inv/T.v3):'—'],
+    ['Custo por interação',T.inter?BRL2(T.inv/T.inter):'—'],
+    ['Custo por visita ao perfil',T.vp?BRL2(T.inv/T.vp):'—'],
+    ['Frequência média',(T.freq).toFixed(2).replace('.',',')+'×']
+  ];
+  document.getElementById('ip-eff').innerHTML=eff.map(k=>`<div class="kpi"><div class="lbl">${k[0]}</div><div class="val">${k[1]}</div></div>`).join('');
   // CPM marca x venda
   const maxc=Math.max(T.cpm,salesCpm)||1;
   document.getElementById('ip-vs').innerHTML=
@@ -1246,21 +1282,24 @@ function impacto(){
   const oc={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtN(c.parsed.y)+' impressões'}}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14}},y:{grid:{color:'#eef2f0'},ticks:{callback:v=>v>=1e3?(v/1e3)+'k':v}}}};
   if(ipChart){ipChart.data=dc;ipChart.options=oc;ipChart.update();}else ipChart=new Chart(document.getElementById('ip-chart'),{type:'bar',data:dc,options:oc});
   // Circulo virtuoso marca -> venda
+  const hookPct=T.impr?T.v3/T.impr*100:0;
   document.getElementById('ip-flow').innerHTML=
-    `<div class="flowbox topo"><div class="ft">1 · Topo — Marca</div><div class="fh">Aquece a região por centavos</div>`+
+    `<div class="flowbox topo"><div class="ft">Frente 1 · Marca (topo)</div><div class="fh">Constrói lembrança e desejo na região</div>`+
       `<div class="fm"><span>Investido</span><b>${BRL(T.inv)}</b></div>`+
       `<div class="fm"><span>Impressões</span><b>${ipBig(T.impr)}</b></div>`+
       `<div class="fm"><span>CPM</span><b>${BRL2(T.cpm)}</b></div>`+
-      `<div class="fm"><span>Interações</span><b>${ipBig(T.inter)}</b></div></div>`+
-    `<div class="flowarr">→</div>`+
-    `<div class="flowbox fundo"><div class="ft">2 · Fundo — Venda</div><div class="fh">Converte barato: a base já está quente</div>`+
+      `<div class="fm"><span>Interações</span><b>${ipBig(T.inter)}</b></div>`+
+      `<div class="fm"><span>Como se mede</span><b>alcance · atenção</b></div></div>`+
+    `<div class="flowarr">+</div>`+
+    `<div class="flowbox fundo"><div class="ft">Frente 2 · Venda (fundo)</div><div class="fh">Converte quem está pronto pra comprar</div>`+
       `<div class="fm"><span>Vendas (Meta)</span><b>${fmtN(Math.round(V.mv))}</b></div>`+
       `<div class="fm"><span>Custo por venda</span><b>${V.mv?BRL2(V.cpa):'—'}</b></div>`+
       `<div class="fm"><span>ROAS</span><b>${V.roas.toFixed(1)}x</b></div>`+
-      `<div class="fm"><span>Faturamento</span><b>${BRL(V.mf)}</b></div></div>`;
-  // Veredito
+      `<div class="fm"><span>Faturamento</span><b>${BRL(V.mf)}</b></div>`+
+      `<div class="fm"><span>Como se mede</span><b>CPA · ROAS</b></div></div>`;
+  // Veredito — 100% topo, sem apoiar em CPA
   document.getElementById('ip-verdict').innerHTML=
-    `<b>Resumo pra reunião:</b> com <b>${BRL(T.inv)}</b> (${pctTopo.toFixed(0)}% da verba), a marca do Spitz apareceu <b>${ipBig(T.impr)} vezes</b> pra gente da região — o equivalente a <b>${BRL(mediaVal)}</b> em mídia comprada (<b>${mult.toFixed(1).replace('.',',')}×</b> o investido), gerando <b>${ipBig(T.inter)} interações</b> e <b>${ipBig(T.v3)} views de vídeo</b>. É esse trabalho, feito a um CPM de <b>${BRL2(T.cpm)}</b>, que mantém o custo por venda em <b>${V.mv?BRL2(V.cpa):'—'}</b> e o ROAS em <b>${V.roas.toFixed(1)}x</b>. Marca forte e barata em cima, venda eficiente embaixo.`;
+    `<b>Resumo pra reunião:</b> com <b>${BRL(T.inv)}</b> (${pctTopo.toFixed(0)}% da verba), a marca do Spitz teve <b>${ipBig(T.impr)} impressões</b> na região, apareceu <b>${T.freq.toFixed(1).replace('.',',')}×</b> pra cada pessoa alcançada, prendeu <b>${hookPct.toFixed(0)}%</b> pra assistir o vídeo e gerou <b>${ipBig(T.inter)} interações</b> — tudo a um CPM de <b>${BRL2(T.cpm)}</b>, o equivalente a <b>${BRL(mediaVal)}</b> em mídia. Isso é <b>construção de marca</b>: presença, lembrança e desejo — o ativo que faz o Spitz ser a <b>primeira opção de lazer</b> da região. Não se mede em venda; se mede em <b>quantas famílias passam a ter o Spitz na cabeça</b>.`;
 }
 var ipDe,ipAte;
 (function initImp(){
