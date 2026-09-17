@@ -173,6 +173,41 @@
   .bwrap .bw .t{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:700;width:100%}
   .bwrap .bw .nm{font-weight:800;color:var(--green)}
   @media(max-width:700px){.bwrap{grid-template-columns:1fr}}
+  /* ===== Impacto de Marca ===== */
+  .imp-hero{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:20px;padding:26px 30px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:0 10px 30px rgba(18,64,47,.25)}
+  .imp-hero .side{flex:1;min-width:190px}
+  .imp-hero .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.6px;opacity:.82;font-weight:700}
+  .imp-hero .big{font-size:2.5rem;font-weight:900;line-height:1.05;margin-top:4px}
+  .imp-hero .big.orange{color:#ffd9b0}
+  .imp-hero .arrow{font-size:1.9rem;opacity:.55;font-weight:900}
+  .imp-hero .mult{background:var(--orange);color:#fff;border-radius:14px;padding:14px 20px;text-align:center;box-shadow:0 6px 16px rgba(240,122,31,.4)}
+  .imp-hero .mult b{font-size:2.3rem;font-weight:900;display:block;line-height:1}
+  .imp-hero .mult span{font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+  .imp-hero .cap{width:100%;font-size:13.5px;opacity:.92;margin-top:2px;line-height:1.55}
+  .imp-eq{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:820px){.imp-eq{grid-template-columns:1fr 1fr}}
+  .eqc{background:var(--card);border:1px solid var(--ring);border-radius:16px;padding:18px;text-align:center;border-top:3px solid var(--orange)}
+  .eqc:nth-child(4n+1){border-top-color:var(--green2)}.eqc:nth-child(4n+3){border-top-color:#2e7d5b}
+  .eqc .ico{font-size:1.8rem}
+  .eqc .n{font-size:1.7rem;font-weight:900;color:var(--green);margin-top:4px;line-height:1}
+  .eqc .d{font-size:12px;color:var(--muted);font-weight:600;margin-top:6px;line-height:1.35}
+  .imp-vs{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .vsrow{display:grid;grid-template-columns:78px 1fr 92px;align-items:center;gap:10px}
+  .vsrow .vn{font-size:13px;font-weight:800;color:var(--green)}
+  .vsrow .vbar{height:30px;border-radius:8px;display:flex;align-items:center;color:#fff;font-weight:800;font-size:12px;padding:0 10px;min-width:44px}
+  .vsrow .vv{font-size:12.5px;font-weight:800;text-align:right}
+  .imp-flow{display:grid;grid-template-columns:1fr 54px 1fr;align-items:stretch;gap:0}
+  @media(max-width:760px){.imp-flow{grid-template-columns:1fr}.imp-flow .flowarr{transform:rotate(90deg);height:40px}}
+  .flowbox{border-radius:16px;padding:20px 22px;color:#fff}
+  .flowbox.topo{background:linear-gradient(135deg,#2e7d5b,#1b5540)}
+  .flowbox.fundo{background:linear-gradient(135deg,var(--orange),var(--orange-d))}
+  .flowbox .ft{font-size:12px;text-transform:uppercase;letter-spacing:.5px;opacity:.85;font-weight:700}
+  .flowbox .fh{font-size:1.05rem;font-weight:800;margin:4px 0 12px}
+  .flowbox .fm{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.18);font-size:13.5px}
+  .flowbox .fm:last-child{border:none}.flowbox .fm b{font-weight:800}
+  .flowarr{display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--orange);font-weight:900}
+  .imp-verdict{background:linear-gradient(135deg,#12402f,#1b5540);color:#fff;border-radius:16px;padding:22px 26px;font-size:14.5px;line-height:1.65}
+  .imp-verdict b{color:#ffd9b0}
 </style>
 </head>
 <body>
@@ -195,6 +230,7 @@
     <div class="tab" data-t="rel">📈 Meta</div>
     <div class="tab" data-t="google">🔍 Google</div>
     <div class="tab" data-t="marca">📣 Reconhecimento</div>
+    <div class="tab" data-t="impacto">🏆 Impacto</div>
     <div class="tab" data-t="comp">📊 Comparativo</div>
     <div class="tab" data-t="vale">🏞️ Vale do Itajaí</div>
   </div>
@@ -456,6 +492,43 @@
       <div class="hint">🎬 vídeo · 🖼️ imagem · clique no criativo (ou <b>↗</b>) pra abrir o post no Instagram · cabeçalho ordena.</div>
       <div class="tblwrap"><table><thead id="th-rec"></thead><tbody id="tb-rec"></tbody></table></div>
     </div></div>
+  </div>
+
+  <!-- ================= IMPACTO DE MARCA ================= -->
+  <div class="pane" id="impacto">
+    <div class="grid"><div class="card full">
+      <h2>🏆 Impacto de Marca <span class="tag">o que a verba entrega</span></h2>
+      <div class="hint">Tradução do investimento de <b>topo de funil</b> (reconhecimento + alcance) em <b>valor real de mídia</b> e presença na região. As campanhas de marca não vendem direto — elas constroem lembrança e aquecem quem depois compra. Escolha o período.</div>
+      <div class="controls">
+        <div class="ctl"><label>De</label><input type="date" id="ip-de"></div>
+        <div class="ctl"><label>Até</label><input type="date" id="ip-ate"></div>
+        <button class="btn ghost" id="ip-30">Últimos 30 dias</button>
+        <button class="btn ghost" id="ip-tudo">↺ Período todo</button>
+      </div>
+    </div></div>
+
+    <div class="grid"><div class="imp-hero" id="ip-hero"></div></div>
+
+    <div class="grid imp-eq" id="ip-eq"></div>
+
+    <div class="grid cols">
+      <div class="card"><h2>💸 Custo pra impactar mil pessoas <span class="tag">marca × venda</span></h2>
+        <div class="hint">O CPM (custo por mil impressões) da marca ao lado do de uma campanha de venda. Mesma exposição, fração do preço.</div>
+        <div class="imp-vs" id="ip-vs"></div>
+      </div>
+      <div class="card"><h2>📊 Presença diária <span class="tag">impressões/dia</span></h2>
+        <div class="hint">A marca do Spitz aparecendo, dia após dia, pra região. Consistência é o que constrói lembrança.</div>
+        <div class="chart-box" style="height:260px"><canvas id="ip-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid"><div class="card full">
+      <h2>🔄 O círculo virtuoso <span class="tag">marca → venda</span></h2>
+      <div class="hint">Por que marca barata importa: ela aquece a região, e é por isso que a venda fecha barato (CPA baixo, ROAS alto).</div>
+      <div class="imp-flow" id="ip-flow"></div>
+    </div></div>
+
+    <div class="grid"><div class="imp-verdict" id="ip-verdict"></div></div>
   </div>
 
   <!-- ================= COMPARATIVO ================= -->
@@ -1113,11 +1186,101 @@ var cpA_de,cpA_ate,cpB_de,cpB_ate;
   document.getElementById('cp-reset').onclick=()=>{pad();comparativo();};
 })();
 
+/* ============ IMPACTO DE MARCA (valor de mídia + círculo marca→venda) ============ */
+let ipChart;
+const POP_POMERODE=35556; // IBGE 2022
+const ipBig=n=>n>=1e6?(n/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2})+' mi':fmtN(Math.round(n));
+function ipTopo(de,ate){ // datas ISO
+  let inv=0,impr=0,alc=0,v3=0,inter=0,clk=0,vp=0;
+  [BRANDALC,BRANDREC].forEach(rows=>rows.forEach(r=>{
+    if(!r[0]||r[0]<de||r[0]>ate)return;
+    inv+=r[2];impr+=r[3];alc+=r[4];v3+=r[5];inter+=r[6];clk+=r[9];vp+=r[10];
+  }));
+  return {inv,impr,alc,v3,inter,clk,vp,cpm:impr?inv/impr*1000:0};
+}
+function ipSales(de,ate){ // datas ISO
+  let mi=0,mimp=0,mv=0,mf=0,gi=0,gv=0,gf=0;
+  CAMPD.forEach(r=>{if(!/Vendas/i.test(r[1]))return;const i=cpIso(r[0]);if(i<de||i>ate)return;mi+=r[2];mimp+=r[3];mv+=r[7];mf+=r[8];});
+  GCAMPD.forEach(r=>{const i=cpIso(r[0]);if(i<de||i>ate)return;gi+=r[2];gv+=r[5];gf+=r[6];});
+  return {mi,mimp,mv,mf,gi,gv,gf,cpm:mimp?mi/mimp*1000:0,cpa:mv?mi/mv:0,roas:mi?mf/mi:0};
+}
+function impacto(){
+  const de=ipDe.value, ate=ipAte.value;
+  const T=ipTopo(de,ate), V=ipSales(de,ate);
+  const salesCpm=V.cpm||15.84;
+  const mediaVal=T.impr/1000*salesCpm;
+  const mult=T.inv?mediaVal/T.inv:0;
+  const razaoCpm=T.cpm?salesCpm/T.cpm:0;
+  // % da verba total (Meta CAMPD + Google GCAMPD) que foi pra topo
+  let allInv=0;
+  CAMPD.forEach(r=>{const i=cpIso(r[0]);if(i>=de&&i<=ate)allInv+=r[2];});
+  GCAMPD.forEach(r=>{const i=cpIso(r[0]);if(i>=de&&i<=ate)allInv+=r[2];});
+  const pctTopo=allInv?T.inv/allInv*100:0;
+  // HERO
+  document.getElementById('ip-hero').innerHTML=
+    `<div class="side"><div class="lbl">Você investiu em marca</div><div class="big">${BRL(T.inv)}</div></div>`+
+    `<div class="arrow">→</div>`+
+    `<div class="side"><div class="lbl">Entregamos em mídia o equivalente a</div><div class="big orange">${BRL(mediaVal)}</div></div>`+
+    `<div class="mult"><b>${mult.toFixed(1).replace('.',',')}×</b><span>o que você pagou</span></div>`+
+    `<div class="cap">Essa mesma exposição, comprada como campanha de conversão (CPM ${BRL2(salesCpm)}), custaria <b>${BRL(mediaVal)}</b>. Como marca, saiu por <b>${BRL(T.inv)}</b> — CPM de só <b>${BRL2(T.cpm)}</b>.</div>`;
+  // EQUIVALENCIAS
+  const vezesPop=POP_POMERODE?T.impr/POP_POMERODE:0;
+  document.getElementById('ip-eq').innerHTML=[
+    ['📣',ipBig(T.impr),'aparições da marca<br>(impressões no período)'],
+    ['👀',vezesPop.toFixed(0)+'×',`é como mostrar o Spitz<br>pra toda Pomerode`],
+    ['🎬',ipBig(T.v3),'visualizações de<br>vídeo (3s+)'],
+    ['❤️',ipBig(T.inter),'interações<br>(curtidas, coment., salvos)']
+  ].map(e=>`<div class="eqc"><div class="ico">${e[0]}</div><div class="n">${e[1]}</div><div class="d">${e[2]}</div></div>`).join('');
+  // CPM marca x venda
+  const maxc=Math.max(T.cpm,salesCpm)||1;
+  document.getElementById('ip-vs').innerHTML=
+    `<div class="vsrow"><div class="vn">🟢 Marca</div><div class="vbar" style="width:${Math.max(14,T.cpm/maxc*100)}%;background:#1a7a4c">${BRL2(T.cpm)}</div><div class="vv" style="color:#1a7a4c">o mais barato</div></div>`+
+    `<div class="vsrow"><div class="vn">🟠 Venda</div><div class="vbar" style="width:${Math.max(14,salesCpm/maxc*100)}%;background:var(--orange)">${BRL2(salesCpm)}</div><div class="vv" style="color:var(--orange-d)">${razaoCpm.toFixed(1)}× + caro</div></div>`+
+    `<div style="text-align:center;font-size:13px;color:var(--muted);margin-top:4px">Cada R$ 1 em marca alcança <b style="color:var(--green)">${razaoCpm.toFixed(1)}×</b> mais gente que R$ 1 em venda.</div>`;
+  // Presenca diaria (impressoes/dia)
+  const days={};
+  [BRANDALC,BRANDREC].forEach(rows=>rows.forEach(r=>{if(!r[0]||r[0]<de||r[0]>ate)return;days[r[0]]=(days[r[0]]||0)+r[3];}));
+  const dk=Object.keys(days).sort();
+  const fmtLbl=iso=>{const p=iso.split('-');return p[2]+'/'+p[1];};
+  const dc={labels:dk.map(fmtLbl),datasets:[{label:'Impressões',data:dk.map(k=>days[k]),backgroundColor:'#2e7d5b',borderRadius:4}]};
+  const oc={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtN(c.parsed.y)+' impressões'}}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14}},y:{grid:{color:'#eef2f0'},ticks:{callback:v=>v>=1e3?(v/1e3)+'k':v}}}};
+  if(ipChart){ipChart.data=dc;ipChart.options=oc;ipChart.update();}else ipChart=new Chart(document.getElementById('ip-chart'),{type:'bar',data:dc,options:oc});
+  // Circulo virtuoso marca -> venda
+  document.getElementById('ip-flow').innerHTML=
+    `<div class="flowbox topo"><div class="ft">1 · Topo — Marca</div><div class="fh">Aquece a região por centavos</div>`+
+      `<div class="fm"><span>Investido</span><b>${BRL(T.inv)}</b></div>`+
+      `<div class="fm"><span>Impressões</span><b>${ipBig(T.impr)}</b></div>`+
+      `<div class="fm"><span>CPM</span><b>${BRL2(T.cpm)}</b></div>`+
+      `<div class="fm"><span>Interações</span><b>${ipBig(T.inter)}</b></div></div>`+
+    `<div class="flowarr">→</div>`+
+    `<div class="flowbox fundo"><div class="ft">2 · Fundo — Venda</div><div class="fh">Converte barato: a base já está quente</div>`+
+      `<div class="fm"><span>Vendas (Meta)</span><b>${fmtN(Math.round(V.mv))}</b></div>`+
+      `<div class="fm"><span>Custo por venda</span><b>${V.mv?BRL2(V.cpa):'—'}</b></div>`+
+      `<div class="fm"><span>ROAS</span><b>${V.roas.toFixed(1)}x</b></div>`+
+      `<div class="fm"><span>Faturamento</span><b>${BRL(V.mf)}</b></div></div>`;
+  // Veredito
+  document.getElementById('ip-verdict').innerHTML=
+    `<b>Resumo pra reunião:</b> com <b>${BRL(T.inv)}</b> (${pctTopo.toFixed(0)}% da verba), a marca do Spitz apareceu <b>${ipBig(T.impr)} vezes</b> pra gente da região — o equivalente a <b>${BRL(mediaVal)}</b> em mídia comprada (<b>${mult.toFixed(1).replace('.',',')}×</b> o investido), gerando <b>${ipBig(T.inter)} interações</b> e <b>${ipBig(T.v3)} views de vídeo</b>. É esse trabalho, feito a um CPM de <b>${BRL2(T.cpm)}</b>, que mantém o custo por venda em <b>${V.mv?BRL2(V.cpa):'—'}</b> e o ROAS em <b>${V.roas.toFixed(1)}x</b>. Marca forte e barata em cima, venda eficiente embaixo.`;
+}
+var ipDe,ipAte;
+(function initImp(){
+  ipDe=document.getElementById('ip-de');ipAte=document.getElementById('ip-ate');
+  const iso=[...BRANDALC,...BRANDREC].map(r=>r[0]).filter(Boolean).sort();
+  const mn=iso[0]||'2026-07-01', mx=iso[iso.length-1]||mn;
+  [ipDe,ipAte].forEach(i=>{i.min=mn;i.max=mx;});
+  const set30=()=>{const d=new Date(mx+'T00:00');d.setDate(d.getDate()-29);const s=d.toISOString().slice(0,10);ipDe.value=(s>mn?s:mn);ipAte.value=mx;};
+  set30();
+  [ipDe,ipAte].forEach(e=>e.onchange=impacto);
+  document.getElementById('ip-30').onclick=()=>{set30();impacto();};
+  document.getElementById('ip-tudo').onclick=()=>{ipDe.value=mn;ipAte.value=mx;impacto();};
+})();
+
 comando();
 relatorio();
 googleTab();
 valeRadar();
 comparativo();
+impacto();
 })(); // fim do wrapper async (dados ao vivo)
 </script>
 </body>
