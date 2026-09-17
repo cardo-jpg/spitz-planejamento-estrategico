@@ -513,8 +513,9 @@
 
     <div class="grid"><div class="card full">
       <h2>🎬 Funil de atenção da marca <span class="tag">qualidade de marca · sem venda</span></h2>
-      <div class="hint">O caminho da <b>atenção</b>: de cada impressão, quantos <b>param pra assistir</b>, quantos <b>ficam até o fim</b>. São métricas de topo puras — medem se o conteúdo prende e constrói marca, <b>sem passar por venda nenhuma</b>.</div>
+      <div class="hint">O caminho da <b>atenção</b>: de cada impressão, quantos <b>param pra assistir</b>, quantos <b>ficam até o fim</b>. São métricas de topo puras — medem se o conteúdo prende e constrói marca, <b>sem passar por venda nenhuma</b>. As cores comparam com a <b>média de mercado</b> (🟢 acima · 🟡 na média · 🔴 abaixo).</div>
       <div class="efunnel" id="ip-funnel"></div>
+      <div class="cp-warn" id="ip-funnel-read" style="background:#e6f4ec;border-color:#a9d8bd;color:#155c38;margin-top:14px"></div>
     </div></div>
 
     <div class="grid"><div class="card full">
@@ -1244,19 +1245,25 @@ function impacto(){
     ['🎬',ipBig(T.v3),'visualizações de<br>vídeo (3s+)'],
     ['❤️',ipBig(T.inter),'interações<br>(curtidas, coment., salvos)']
   ].map(e=>`<div class="eqc"><div class="ico">${e[0]}</div><div class="n">${e[1]}</div><div class="d">${e[2]}</div></div>`).join('');
-  // FUNIL DE ATENCAO (topo puro: impressoes -> 3s -> 25% -> 75%)
+  // FUNIL DE ATENCAO (topo puro: impressoes -> 3s -> 25% -> 75%) com benchmark de mercado
+  const benchCor=(v,g,m)=>v>=g?'#1a7a4c':v>=m?'#b45f0a':'#c0392b';
+  const hook=T.impr?T.v3/T.impr*100:0, ret25=T.v3?T.p25/T.v3*100:0, ret75=T.p25?T.p75/T.p25*100:0;
   const FA=[
     {n:'Impressões',v:T.impr,w:100,cost:[['CPM',T.cpm]]},
-    {n:'Assistiram 3s+',v:T.v3,w:80,conv:['Pararam pra ver',T.impr?T.v3/T.impr*100:0],cost:[['Custo/view',T.v3?T.inv/T.v3:0]]},
-    {n:'Chegaram a 25%',v:T.p25,w:58,conv:['Retenção',T.v3?T.p25/T.v3*100:0]},
-    {n:'Assistiram 75%',v:T.p75,w:40,conv:['Ficaram até o fim',T.p25?T.p75/T.p25*100:0]}
+    {n:'Assistiram 3s+',v:T.v3,w:80,conv:['Pararam pra ver',hook,benchCor(hook,25,15)],cost:[['Custo/view',T.v3?T.inv/T.v3:0]]},
+    {n:'Chegaram a 25%',v:T.p25,w:58,conv:['Do hook em diante',ret25,benchCor(ret25,80,60)]},
+    {n:'Assistiram 75%',v:T.p75,w:40,conv:['Ficaram até o fim',ret75,benchCor(ret75,50,30)]}
   ];
   document.getElementById('ip-funnel').innerHTML=FA.map((s,i)=>`
     <div class="efstep">
-      <div class="efconv">${s.conv?`${pct(s.conv[1])}<small>${s.conv[0]}</small>`:''}</div>
+      <div class="efconv">${s.conv?`<span style="color:${s.conv[2]}">${pct(s.conv[1])}</span><small>${s.conv[0]}</small>`:''}</div>
       <div class="efbar" style="width:${s.w}%;background:${FC2[i]}"><b>${fmtN(s.v)}</b><span>${s.n}</span></div>
       <div class="efcost">${(s.cost||[]).map(c=>`<div class="pill2">${BRL2(c[1])}<small>${c[0]}</small></div>`).join('')}</div>
     </div>`).join('');
+  // leitura com benchmark de mercado (hold rate = 75% sobre TODAS as impressoes)
+  const holdAll=T.impr?T.p75/T.impr*100:0;
+  const holdTier=holdAll>=15?['acima da média','#1a7a4c']:holdAll>=10?['dentro da média alta','#1a7a4c']:holdAll>=6?['na média','#b45f0a']:['abaixo da média','#c0392b'];
+  document.getElementById('ip-funnel-read').innerHTML=`<span>📊</span><div><b>Leitura:</b> <b>${holdAll.toFixed(1).replace('.',',')}%</b> de tudo que foi exibido foi assistido <b>até 75%</b> — a média de vídeo em redes sociais fica em <b>~10–15%</b>, então o Spitz está <b style="color:${holdTier[1]}">${holdTier[0]}</b>. Traduzindo: quando o anúncio aparece, as pessoas <b>realmente assistem</b> — sinal de criativo forte e marca que prende. Hook de <b>${hook.toFixed(0)}%</b> (parar pra ver) é considerado bom a partir de 15%.</div>`;
   // EFICIENCIA DE TOPO (moeda de marca, nada de CPA)
   const eff=[
     ['CPM · mil impressões',BRL2(T.cpm)],
