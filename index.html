@@ -509,18 +509,24 @@
 
     <div class="grid"><div class="imp-hero" id="ip-hero"></div></div>
 
+    <div class="grid"><div class="card full">
+      <h2>📡 Topo por canal <span class="tag">Meta + Google</span></h2>
+      <div class="hint">De onde vem a presença de marca. O <b>Google</b> entra com <b>Display</b> e <b>YouTube institucional</b> (topo). P-max e Search ficam no lado de venda, pra não duplicar conversão.</div>
+      <table><thead><tr><th>Canal</th><th>Investido</th><th>Impressões</th><th>CPM</th></tr></thead><tbody id="ip-canal"></tbody></table>
+    </div></div>
+
     <div class="grid imp-eq" id="ip-eq"></div>
 
     <div class="grid"><div class="card full">
-      <h2>🎬 Funil de atenção da marca <span class="tag">qualidade de marca · sem venda</span></h2>
+      <h2>🎬 Funil de atenção da marca <span class="tag">vídeo Meta · sem venda</span></h2>
       <div class="hint">O caminho da <b>atenção</b>: de cada impressão, quantos <b>param pra assistir</b>, quantos <b>ficam até o fim</b>. São métricas de topo puras — medem se o conteúdo prende e constrói marca, <b>sem passar por venda nenhuma</b>. As cores comparam com a <b>média de mercado</b> (🟢 acima · 🟡 na média · 🔴 abaixo).</div>
       <div class="efunnel" id="ip-funnel"></div>
       <div class="cp-warn" id="ip-funnel-read" style="background:#e6f4ec;border-color:#a9d8bd;color:#155c38;margin-top:14px"></div>
     </div></div>
 
     <div class="grid"><div class="card full">
-      <h2>⚡ Eficiência de topo <span class="tag">custo em moeda de marca</span></h2>
-      <div class="hint">Quanto custa cada resultado de marca — alcance, atenção, interação, interesse. Nenhum deles depende de uma venda acontecer.</div>
+      <h2>⚡ Eficiência de topo <span class="tag">moeda de marca · Meta</span></h2>
+      <div class="hint">Quanto custa cada resultado de marca — alcance, atenção, interação, interesse (engajamento de vídeo, dados do Meta). Nenhum deles depende de uma venda acontecer.</div>
       <div class="grid kpis" id="ip-eff" style="margin-top:2px"></div>
     </div></div>
 
@@ -1218,31 +1224,42 @@ function ipSales(de,ate){ // datas ISO
   GCAMPD.forEach(r=>{const i=cpIso(r[0]);if(i<de||i>ate)return;gi+=r[2];gv+=r[5];gf+=r[6];});
   return {mi,mimp,mv,mf,gi,gv,gf,cpm:mimp?mi/mimp*1000:0,cpa:mv?mi/mv:0,roas:mi?mf/mi:0};
 }
+function ipGoogleTopo(de,ate){ // Google topo puro: Display + YouTube (sem P-max/Search, que sao venda)
+  let inv=0,impr=0,clk=0;
+  GCAMPD.forEach(r=>{if(!/Display|Youtube/i.test(r[1]))return;const i=cpIso(r[0]);if(i<de||i>ate)return;inv+=r[2];impr+=r[3];clk+=r[4];});
+  return {inv,impr,clk,cpm:impr?inv/impr*1000:0};
+}
 function impacto(){
   const de=ipDe.value, ate=ipAte.value;
-  const T=ipTopo(de,ate), V=ipSales(de,ate);
+  const T=ipTopo(de,ate), V=ipSales(de,ate), G=ipGoogleTopo(de,ate);
+  const topoInv=T.inv+G.inv, topoImpr=T.impr+G.impr, topoCpm=topoImpr?topoInv/topoImpr*1000:0;
   const salesCpm=V.cpm||15.84;
-  const mediaVal=T.impr/1000*salesCpm;
-  const mult=T.inv?mediaVal/T.inv:0;
-  const razaoCpm=T.cpm?salesCpm/T.cpm:0;
+  const mediaVal=topoImpr/1000*salesCpm;
+  const mult=topoInv?mediaVal/topoInv:0;
+  const razaoCpm=topoCpm?salesCpm/topoCpm:0;
   // % da verba total (Meta CAMPD + Google GCAMPD) que foi pra topo
   let allInv=0;
   CAMPD.forEach(r=>{const i=cpIso(r[0]);if(i>=de&&i<=ate)allInv+=r[2];});
   GCAMPD.forEach(r=>{const i=cpIso(r[0]);if(i>=de&&i<=ate)allInv+=r[2];});
-  const pctTopo=allInv?T.inv/allInv*100:0;
+  const pctTopo=allInv?topoInv/allInv*100:0;
   // HERO
   document.getElementById('ip-hero').innerHTML=
-    `<div class="side"><div class="lbl">Você investiu em marca</div><div class="big">${BRL(T.inv)}</div></div>`+
+    `<div class="side"><div class="lbl">Você investiu em marca</div><div class="big">${BRL(topoInv)}</div></div>`+
     `<div class="arrow">→</div>`+
     `<div class="side"><div class="lbl">Entregamos em mídia o equivalente a</div><div class="big orange">${BRL(mediaVal)}</div></div>`+
     `<div class="mult"><b>${mult.toFixed(1).replace('.',',')}×</b><span>o que você pagou</span></div>`+
-    `<div class="cap">Essa mesma exposição, comprada como campanha de conversão (CPM ${BRL2(salesCpm)}), custaria <b>${BRL(mediaVal)}</b>. Como marca, saiu por <b>${BRL(T.inv)}</b> — CPM de só <b>${BRL2(T.cpm)}</b>.</div>`;
+    `<div class="cap">Meta + Google juntos. Essa mesma exposição, comprada como campanha de conversão (CPM ${BRL2(salesCpm)}), custaria <b>${BRL(mediaVal)}</b>. Como marca, saiu por <b>${BRL(topoInv)}</b> — CPM de só <b>${BRL2(topoCpm)}</b>.</div>`;
+  // TOPO POR CANAL (Meta x Google)
+  document.getElementById('ip-canal').innerHTML=
+    `<tr><td class="name">📘 Meta · reconhecimento + alcance</td><td>${BRL(T.inv)}</td><td>${fmtN(T.impr)}</td><td>${BRL2(T.cpm)}</td></tr>`+
+    `<tr><td class="name">🔍 Google · Display + YouTube</td><td>${BRL(G.inv)}</td><td>${fmtN(G.impr)}</td><td>${G.impr?BRL2(G.cpm):'—'}</td></tr>`+
+    `<tr style="border-top:2px solid var(--green)"><td class="name" style="font-weight:800">Total topo</td><td style="font-weight:800;color:var(--green)">${BRL(topoInv)}</td><td style="font-weight:800;color:var(--green)">${fmtN(topoImpr)}</td><td style="font-weight:800;color:var(--green)">${BRL2(topoCpm)}</td></tr>`;
   // EQUIVALENCIAS
-  const vezesPop=POP_POMERODE?T.impr/POP_POMERODE:0;
+  const vezesPop=POP_POMERODE?topoImpr/POP_POMERODE:0;
   document.getElementById('ip-eq').innerHTML=[
-    ['📣',ipBig(T.impr),'aparições da marca<br>(impressões no período)'],
+    ['📣',ipBig(topoImpr),'aparições da marca<br>(impressões · Meta + Google)'],
     ['👀',vezesPop.toFixed(0)+'×',`é como mostrar o Spitz<br>pra toda Pomerode`],
-    ['🎬',ipBig(T.v3),'visualizações de<br>vídeo (3s+)'],
+    ['🎬',ipBig(T.v3),'visualizações de<br>vídeo 3s+ (Meta)'],
     ['❤️',ipBig(T.inter),'interações<br>(curtidas, coment., salvos)']
   ].map(e=>`<div class="eqc"><div class="ico">${e[0]}</div><div class="n">${e[1]}</div><div class="d">${e[2]}</div></div>`).join('');
   // FUNIL DE ATENCAO (topo puro: impressoes -> 3s -> 25% -> 75%) com benchmark de mercado
@@ -1275,14 +1292,15 @@ function impacto(){
   ];
   document.getElementById('ip-eff').innerHTML=eff.map(k=>`<div class="kpi"><div class="lbl">${k[0]}</div><div class="val">${k[1]}</div></div>`).join('');
   // CPM marca x venda
-  const maxc=Math.max(T.cpm,salesCpm)||1;
+  const maxc=Math.max(topoCpm,salesCpm)||1;
   document.getElementById('ip-vs').innerHTML=
-    `<div class="vsrow"><div class="vn">🟢 Marca</div><div class="vbar" style="width:${Math.max(14,T.cpm/maxc*100)}%;background:#1a7a4c">${BRL2(T.cpm)}</div><div class="vv" style="color:#1a7a4c">o mais barato</div></div>`+
+    `<div class="vsrow"><div class="vn">🟢 Marca</div><div class="vbar" style="width:${Math.max(14,topoCpm/maxc*100)}%;background:#1a7a4c">${BRL2(topoCpm)}</div><div class="vv" style="color:#1a7a4c">o mais barato</div></div>`+
     `<div class="vsrow"><div class="vn">🟠 Venda</div><div class="vbar" style="width:${Math.max(14,salesCpm/maxc*100)}%;background:var(--orange)">${BRL2(salesCpm)}</div><div class="vv" style="color:var(--orange-d)">${razaoCpm.toFixed(1)}× + caro</div></div>`+
     `<div style="text-align:center;font-size:13px;color:var(--muted);margin-top:4px">Cada R$ 1 em marca alcança <b style="color:var(--green)">${razaoCpm.toFixed(1)}×</b> mais gente que R$ 1 em venda.</div>`;
   // Presenca diaria (impressoes/dia)
   const days={};
   [BRANDALC,BRANDREC].forEach(rows=>rows.forEach(r=>{if(!r[0]||r[0]<de||r[0]>ate)return;days[r[0]]=(days[r[0]]||0)+r[3];}));
+  GCAMPD.forEach(r=>{if(!/Display|Youtube/i.test(r[1]))return;const i=cpIso(r[0]);if(i<de||i>ate)return;days[i]=(days[i]||0)+r[3];});
   const dk=Object.keys(days).sort();
   const fmtLbl=iso=>{const p=iso.split('-');return p[2]+'/'+p[1];};
   const dc={labels:dk.map(fmtLbl),datasets:[{label:'Impressões',data:dk.map(k=>days[k]),backgroundColor:'#2e7d5b',borderRadius:4}]};
@@ -1292,9 +1310,9 @@ function impacto(){
   const hookPct=T.impr?T.v3/T.impr*100:0;
   document.getElementById('ip-flow').innerHTML=
     `<div class="flowbox topo"><div class="ft">Frente 1 · Marca (topo)</div><div class="fh">Constrói lembrança e desejo na região</div>`+
-      `<div class="fm"><span>Investido</span><b>${BRL(T.inv)}</b></div>`+
-      `<div class="fm"><span>Impressões</span><b>${ipBig(T.impr)}</b></div>`+
-      `<div class="fm"><span>CPM</span><b>${BRL2(T.cpm)}</b></div>`+
+      `<div class="fm"><span>Investido</span><b>${BRL(topoInv)}</b></div>`+
+      `<div class="fm"><span>Impressões</span><b>${ipBig(topoImpr)}</b></div>`+
+      `<div class="fm"><span>CPM</span><b>${BRL2(topoCpm)}</b></div>`+
       `<div class="fm"><span>Interações</span><b>${ipBig(T.inter)}</b></div>`+
       `<div class="fm"><span>Como se mede</span><b>alcance · atenção</b></div></div>`+
     `<div class="flowarr">+</div>`+
@@ -1306,7 +1324,7 @@ function impacto(){
       `<div class="fm"><span>Como se mede</span><b>CPA · ROAS</b></div></div>`;
   // Veredito — 100% topo, sem apoiar em CPA
   document.getElementById('ip-verdict').innerHTML=
-    `<b>Resumo pra reunião:</b> com <b>${BRL(T.inv)}</b> (${pctTopo.toFixed(0)}% da verba), a marca do Spitz teve <b>${ipBig(T.impr)} impressões</b> na região, apareceu <b>${T.freq.toFixed(1).replace('.',',')}×</b> pra cada pessoa alcançada, prendeu <b>${hookPct.toFixed(0)}%</b> pra assistir o vídeo e gerou <b>${ipBig(T.inter)} interações</b> — tudo a um CPM de <b>${BRL2(T.cpm)}</b>, o equivalente a <b>${BRL(mediaVal)}</b> em mídia. Isso é <b>construção de marca</b>: presença, lembrança e desejo — o ativo que faz o Spitz ser a <b>primeira opção de lazer</b> da região. Não se mede em venda; se mede em <b>quantas famílias passam a ter o Spitz na cabeça</b>.`;
+    `<b>Resumo pra reunião:</b> com <b>${BRL(topoInv)}</b> (${pctTopo.toFixed(0)}% da verba) em <b>Meta + Google</b>, a marca do Spitz teve <b>${ipBig(topoImpr)} impressões</b> na região, a um CPM de <b>${BRL2(topoCpm)}</b> — o equivalente a <b>${BRL(mediaVal)}</b> em mídia comprada. No Meta, o vídeo ainda apareceu <b>${T.freq.toFixed(1).replace('.',',')}×</b> pra cada pessoa, prendeu <b>${hookPct.toFixed(0)}%</b> pra assistir e gerou <b>${ipBig(T.inter)} interações</b>. Isso é <b>construção de marca</b>: presença, lembrança e desejo — o ativo que faz o Spitz ser a <b>primeira opção de lazer</b> da região. Não se mede em venda; se mede em <b>quantas famílias passam a ter o Spitz na cabeça</b>.`;
 }
 var ipDe,ipAte;
 (function initImp(){
